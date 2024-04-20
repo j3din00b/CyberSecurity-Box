@@ -230,6 +230,7 @@ if [ $SUBNET_sep -lt 125 ]
 fi
 
 AD_GUARD='0'
+echo
 read -p 'Install AdGuard-Blocker? Need external USB-Device [y/N] ' -s  -n 1 ADGUARD_ACTIVE
 
 if [ "$ADGUARD_ACTIVE" = "" ]
@@ -291,7 +292,8 @@ if [ "$DNS_PORT" = "" ]
 	  		if [ "$TOR_ONION" = "1" ]
      				then
 					UNBOUND_Relay_port='9053'
-			elif [ "$STUBBY" = "0" ] then
+			elif [ "$STUBBY" = "0" ] 
+   				then
      					UNBOUND_Relay_port='53'
      			else
    					UNBOUND_Relay_port='5453'
@@ -304,7 +306,8 @@ if [ "$DNS_PORT" = "" ]
      				then
 					UNBOUND_Relay_port='9053'
      			
-     			elif [ "$STUBBY" = "0" ] then
+     			elif [ "$STUBBY" = "0" ] 
+				then
      					UNBOUND_Relay_port='53'
      			else
     					UNBOUND_Relay_port='5453'
