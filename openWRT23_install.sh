@@ -24060,14 +24060,20 @@ if [ "$UNBOUND" = "1" ]
 			set_unbound >> install.log
 fi
 
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create UNBOUND URL-Filter' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create UNBOUND URL-Filter' >> install.log
 create_unbound_url_filter >> install.log
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create DNSMASQ URL-Filter' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create DNSMASQ URL-Filter' >> install.log
 create_dnsmasq_url_filter >> install.log
 view_config
-
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Customize Firmware' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Customize Firmware' >> install.log
 customize_firmware >> install.log
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Hotspot'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Hotspot' >> install.log
 create_hotspot >> install.log
 
@@ -24077,29 +24083,45 @@ create_hotspot >> install.log
 #echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Network' >> install.log
 #create_network_23 >> install.log
 ###################################################################################################
+
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create VLAN' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create VLAN' >> install.log
 create_vlan_bridge >> install.log
+
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' SetDHCP' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' SetDHCP' >> install.log
 set_dhcp >> install.log
+
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Networkinterfaces'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Networkinterfaces' >> install.log
 create_network_interfaces >> install.log
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAM'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAM' >> install.log
 create_wlan >> install.log
-
+echo
+cho $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Firewall-Zones' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Firewall-Zones' >> install.log
 create_firewall_zones >> install.log
 ####################################################################################################
 #create_MWAN >> install.log
 ####################################################################################################
 view_config
-
+echo
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' Set Firewall-Rules'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' Set Firewall-Rules' >> install.log
 set_firewall_rules >> install.log
 
 if [ "$AD_GUARD" = "1" ]
         then
+		echo
+  		echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Set_Mountpoints' 
          	echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Set_Mountpoints' >> install.log
          	set_mountpoints >> install.log
+	  	echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Install Adguard'
 		echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Install Adguard' >> install.log
 		install_adguard >> install.log
 fi
