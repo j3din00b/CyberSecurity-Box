@@ -254,12 +254,12 @@ echo
 read -p 'Use TOR(Onion)-Network? [Y/n] ' -s  -n 1 TOR_ACTIVE
 if [ "$TOR_ACTIVE" = "" ]
 	then
- 							TOR_ONION='1'
+		TOR_ONION='1'
 	elif [ "$TOR_ACTIVE" = "y" ]
  		then
-								TOR_ONION='1'
+		TOR_ONION='1'
  	else
-  						TOR_ONION='0'
+		TOR_ONION='0'
 fi
 
 echo
@@ -308,29 +308,29 @@ if [ "$DNS_PORT" = "" ]
    			DNSMASQ_Relay_port='5353'
 	  		if [ "$TOR_ONION" = "1" ]
      				then
-														UNBOUND_Relay_port='9053'
+					UNBOUND_Relay_port='9053'
      			
-     elif [ "$STUBBY" = "0" ] 
-									then
-     									UNBOUND_Relay_port='53'
-     				else
-    										UNBOUND_Relay_port='5453'
-    	fi
+	elif [ "$STUBBY" = "0" ] 
+			then
+   					UNBOUND_Relay_port='53'
+			else
+   					UNBOUND_Relay_port='5453'
+	fi
 		elif [ "$TOR_ONION" = "1" ]
       	then
 	       		DNSMASQ_Relay_port='9053'
-	  							UNBOUND_Relay_port='9053'
-     					UNBOUND='0'
+			UNBOUND_Relay_port='9053'
+     			UNBOUND='0'
      		elif [ "$STUBBY" = "0" ] 
-										then
-     									DNSMASQ_Relay_port='53'
-														UNBOUND_Relay_port='53'
-   											UNBOUND='0'
-    		else
- 										DNSMASQ_Relay_port='5453'
-											UNBOUND_Relay_port='5453'
-   								UNBOUND='0'
-fi
+			then
+   				DNSMASQ_Relay_port='53'
+	 			UNBOUND_Relay_port='53'
+     				UNBOUND='0'
+	 		else
+    				DNSMASQ_Relay_port='5453'
+				UNBOUND_Relay_port='5453'
+    				UNBOUND='0'
+	fi
 
 if [ ! -z "$6" ]
 	then
