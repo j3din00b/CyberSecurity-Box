@@ -24110,7 +24110,7 @@ echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAM'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAM' >> install.log
 create_wlan >> install.log
 echo
-cho $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Firewall-Zones' 
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Firewall-Zones' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Firewall-Zones' >> install.log
 create_firewall_zones >> install.log
 ####################################################################################################
