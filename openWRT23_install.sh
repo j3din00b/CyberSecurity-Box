@@ -180,7 +180,9 @@ if [ ! -z "$4" ]
 fi
 
 WIFI_SSID_org=$WIFI_SSID
+
 echo
+
 read -p 'The Main-WiFi-SSID? ['$(echo $WIFI_SSID)'] ' WIFI_SSID
 if [ "$WIFI_SSID" = "" ]
         then
@@ -195,7 +197,9 @@ if [ ! -z "$5" ]
 fi
 
 WIFI_PASS_org=$WIFI_PASS
+
 echo
+
 read -p 'And the WiFi-Key? [Cyber,Sec9ox] ' WIFI_PASS
 if [ "$WIFI_PASS" = "" ]
 	then
