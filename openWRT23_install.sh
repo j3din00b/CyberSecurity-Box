@@ -462,10 +462,11 @@ echo
 /etc/init.d/dnsmasq disable >> install.log
 opkg update >> install.log
 opkg remove dnsmasq >> install.log
-opkg update >/dev/null
+opkg update >> install.log
 if [ "$(opkg list-upgradable)" != "" ]
 	then
 		echo 'upgrade installed Packages' >> install.log
+  		opkg update >> install.log
   		opkg upgrade $(opkg list-upgradable | awk '{print $1}')  >> install.log
 fi 
 install_check
@@ -475,18 +476,22 @@ if [ "$unbound_inst" = "" ]
 		if [ "$main_release" = "23" ] 
   			then
   				echo $main_release
-      				opkg install nano wget curl kmod-nls-cp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server tc luci-app-qos luci-app-nft-qos nft-qos getdns drill dnsmasq-full
+      				opkg update >> install.log
+      				opkg install nano wget curl kmod-nls-opkg update >> install.logcp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server tc luci-app-qos luci-app-nft-qos nft-qos getdns drill dnsmasq-full
 			elif [ "$main_release" = "22" ]
    				then
        					echo $main_release
+	    				opkg update >> install.log
 					opkg install nano wget curl kmod-nls-cp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server tc luci-app-qos luci-app-nft-qos nft-qos getdns drill mwan3 luci-app-mwan3 dnsmasq-full
 			else 
    					echo $main_release
+					opkg update >> install.log
    					opkg install nano wget curl kmod-usb-storage kmod-usb-storage-extras e2fsprogs kmod-fs-ext4 block-mount kmod-fs-vfat kmod-nls-cp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-control-up unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server ipset ipset-dns tc iptables-mod-ipopt luci-app-qos luci-app-nft-qos nft-qos getdns drill mwan3 luci-app-mwan3 dnsmasq-full --force-overwrite >> install.log
 		fi
    			opkg update >> install.log
 fi
 
+opkg update >> install.log
 if [ "$iptables_inst" != "" ] 
 	then
 		echo 'remove iptable-Packages' >> install.log
