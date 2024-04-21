@@ -484,7 +484,7 @@ if [ "$unbound_inst" = "" ]
   			then
   				echo $main_release
       				opkg update >> install.log
-      				opkg install nano wget curl kmod-nls-opkg update >> install.logcp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server tc luci-app-qos luci-app-nft-qos nft-qos getdns drill dnsmasq-full
+      				opkg install nano wget curl kmod-nls-qp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server tc luci-app-qos luci-app-nft-qos nft-qos getdns drill dnsmasq-full
 			elif [ "$main_release" = "22" ]
    				then
        					echo $main_release
