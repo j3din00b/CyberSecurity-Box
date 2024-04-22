@@ -484,7 +484,7 @@ if [ "$unbound_inst" = "" ]
   			then
   				echo $main_release
       				opkg update >> install.log
-      				opkg install nano wget curl kmod-nls-opkg update >> install.logcp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server tc luci-app-qos luci-app-nft-qos nft-qos getdns drill dnsmasq-full
+      				opkg install nano wget curl kmod-nls-cp437 kmod-nls-iso8859-1 unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound ca-certificates acme acme-dnsapi luci-app-acme stubby tor tor-geoip bind-dig openssh-sftp-server tc luci-app-qos luci-app-nft-qos nft-qos getdns drill dnsmasq-full
 			elif [ "$main_release" = "22" ]
    				then
        					echo $main_release
@@ -3488,6 +3488,77 @@ echo
 }
 
 set_tor() {
+/etc/init.d/tor stop >> install.log
+/etc/init.d/log restart >> install.log
+
+# Configure Tor client
+cat << EOF >> /etc/tor/torrc
+AutomapHostsOnResolve 1
+VirtualAddrNetworkIPV4 10.192.0.0/10
+VirtualAddrNetworkIPv6 fc00::/7
+
+SocksListenAddress 127.0.0.1
+SocksListenAddress [0::1]
+
+ControlPort 9051
+CookieAuthentication 1
+
+DNSPort 127.0.0.1:9053
+DNSPort 127.0.0.1:9153
+
+TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+
+SocksPort 9050
+SocksPort 9150
+SocksPort 9100
+SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+
+ORPort 127.0.0.1:9049
+DirPort 9030
+
+HTTPTunnelPort 9060
+
+DisableDebuggerAttachment 1
+DisableAllSwap 1
+
+ExitPolicy reject *:*
+#ExitPolicy set Node Type. Relay
+RelayBandwidthRate 10000 KB
+RelayBandwidthBurst 50000 KB
+DisableDebuggerAttachment 0
+AccountingStart day 06:00
+AccountingMax 50 GBytes
+
+NumCPUs 1
+
+#only secure exitnodes
+StrictNodes 1
+GeoIPExcludeUnknown 1
+
+ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
+ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
+
+SafeSocks 1
+WarnUnsafeSocks 1
+#Log warn syslog
+AvoidDiskWrites 1
+RunAsDaemon 1
+Nickname EnemyOneEU
+
+## ServerDNSResolvConfFile filename
+## ServerDNSAllowBrokenConfig 0|1
+## ServerDNSSearchDomains 1
+##
+##CacheIPv4DNS 1
+##ReachableAddresses accept *:443, reject *:*
+##ReachableORAddresses *:443
+
+DataDirectory /var/lib/tor
+User tor
+EOF
+}
+
+set_tor_old() {
 /etc/init.d/tor stop >> install.log
 /etc/init.d/log restart >> install.log
 
