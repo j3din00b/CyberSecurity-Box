@@ -650,8 +650,8 @@ AVM_Mesh_port="50842 53805"
 all_other_AVM_Mesh_port="1-50841 50843-53804 53806-65535"
 
 #Torrc Ports
-TORRC_port="9030 9040 9049 9050 9053 9060"
-all_other_TORRC_port="1-9029 9031-9039 9041-9048 9051 9052 9054-9059 9061-65535"
+TORRC_port="9030 9040 9049 9050 9053 9060 9100 9150 9200"
+all_other_TORRC_port="1-9029 9031-9039 9041-9048 9051 9052 9054-9059 9061-9099 9101-9049 9051-9199 9201-65535"
 
 
 #SPYPE
@@ -962,8 +962,8 @@ iptab_AVM_Mesh_port="50842 53805"
 iptab_all_other_AVM_Mesh_port="1:50841 50843:53804 53806:65535"
 
 #Torrc Ports
-iptab_TORRC_port="9030 9040 9049 9050 9053 9060"
-iptab_all_other_TORRC_port="1:9029 9031:9039 9041:9048 9051 9052 9054:9059 9061:65535"
+iptab_TORRC_port="9030 9040 9049 9050 9053 9060 9100 9150 9200"
+iptab_all_other_TORRC_port="1:9029 9031:9039 9041:9048 9051 9052 9054:9059 9061:9099 9102:9149 9151:9199 9201:65535"
 
 
 
@@ -3505,21 +3505,23 @@ SocksListenAddress [0::1]
 
 ControlPort 9051
 
-DNSPort 9053
-DNSPort 9153
-DNSPort 853
-DNSPort 53
-DNSPort 54
-DNSPort 9053
-DNSPort 9153
-DNSPort 853
-DNSPort 54
+DNSPort 127.0.0.1:9053
+DNSPort 127.0.0.1:9153
+#DNSPort 127.0.0.1:853
+#DNSPort 127.0.0.1:53
+#DNSPort 54
+#DNSPort 9053
+#DNSPort 9153
+#DNSPort 853
+#DNSPort 54
 
 TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
 #SocksPort ist der Port für die Clientverbindung
 SocksPort 9050
 SocksPort 9150
+SocksPort 9100
+SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
 ORPort 9049
 DirPort 9030
@@ -3542,6 +3544,7 @@ NumCPUs 1
 
 #Nur sichere Exitnodes Benutzen
 StrictExitNodes 1 # war aktiv
+GeoIPExcludeUnknown 1
 
 ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
 ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
@@ -3583,6 +3586,9 @@ AutomapHostsSuffixes .onion,.exit
 ## SOCKS5Password <password>
 ##
 ## Log notice file /var/log/tor/tor-notices.log
+ReachableAddresses accept *:443, reject *:*
+ReachableORAddresses *:443
+
 DataDirectory /var/lib/tor
 User tor
 
@@ -3653,12 +3659,26 @@ SocksPort $(echo $INET_ip):9050
 SocksPort 127.0.0.1:9050
 SocksPort [0::1]:9050
 
+SocksPort $(echo $SERVER_ip):9100
+SocksPort $(echo $HCONTROL_ip):9100
+SocksPort $(echo $CONTROL_ip):9100
+SocksPort $(echo $INET_ip):9100
+SocksPort 127.0.0.1:9100
+SocksPort [0::1]:9100
+
 SocksPort $(echo $SERVER_ip):9150
 SocksPort $(echo $HCONTROL_ip):9150
 SocksPort $(echo $CONTROL_ip):9150
 SocksPort $(echo $INET_ip):9150
 SocksPort 127.0.0.1:9150
 SocksPort [0::1]:9150
+
+SocksPort $(echo $SERVER_ip):9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort $(echo $HCONTROL_ip):9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort $(echo $CONTROL_ip):9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort $(echo $INET_ip):9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort 127.0.0.1:9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort [0::1]:9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
 #ORPort empfängt Daten aus dem Tor Netzwerk im Internet
 #ORPort $(echo $WAN_ip):9049
@@ -3725,6 +3745,9 @@ AutomapHostsSuffixes .onion,.exit
 ## SOCKS5Password <password>
 ##
 ## Log notice file /var/log/tor/tor-notices.log
+ReachableAddresses accept *:443, reject *:*
+ReachableORAddresses *:443
+
 DataDirectory /var/lib/tor
 User tor
 
