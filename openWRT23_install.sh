@@ -24158,7 +24158,7 @@ if [ ! -z $1 ]
  
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' Install Updates' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' Install Updates' >> install.log
-install_update >> install.log
+install_update #>> install.log
 service log restart
 
 if [ "$TOR_ONION" = "1" ]
