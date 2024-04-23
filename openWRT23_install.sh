@@ -528,14 +528,8 @@ if [ "$unbound_inst" = "" ]
    					opkg update >> install.log
    					opkg install mwan3 luci-app-mwan3 dnsmasq-full --force-overwrite >> install.log
 		fi
-   			opkg update >> install.log
-fi
-
-opkg update >> install.log
-
-		fi
    		opkg update >> install.log
-fi
+	fi
 
 opkg update >> install.log
 if [ "$iptables_inst" != "" ] 
