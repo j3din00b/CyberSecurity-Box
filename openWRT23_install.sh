@@ -445,13 +445,13 @@ view_config
 
 install_check() {
 
-opkg update >/dev/null
-unbound_inst=$(opkg list-installed | grep unbound)
-stubby_inst=$(opkg list-installed | grep stubby)
-tor_inst=$(opkg list-installed | grep tor)
-dnsmasq_inst=$(opkg list-installed | grep dnsmasq-full)
-odhcpd_inst=$(opkg list-installed | grep odhcpd)
-iptables_inst=$(opkg list-installed | grep iptable)
+	opkg update >/dev/null
+	unbound_inst=$(opkg list-installed | grep unbound)
+	stubby_inst=$(opkg list-installed | grep stubby)
+	tor_inst=$(opkg list-installed | grep tor)
+	dnsmasq_inst=$(opkg list-installed | grep dnsmasq-full)
+	odhcpd_inst=$(opkg list-installed | grep odhcpd)
+	iptables_inst=$(opkg list-installed | grep iptable)
 }
 
 install_update() {
@@ -24142,6 +24142,7 @@ echo >> install.log
 echo $main_release
 echo >> install.log
 define_variables >> install.log
+echo 'Automation Install'
 ask_parameter $1 $2 $3 $4 $5 $6
 if [ ! -z $1 ]
 	then
@@ -24154,6 +24155,8 @@ if [ ! -z $1 ]
 	 	echo $5 >> install.log
    		echo $6 >> install.log
  fi
+ 
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' Install Updates' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' Install Updates' >> install.log
 install_update >> install.log
 service log restart
