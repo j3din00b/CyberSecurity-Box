@@ -466,6 +466,118 @@ if [ "$dnsmasq_inst" != "" ]
 	then
 		/etc/init.d/dnsmasq stop >> install.log
 		/etc/init.d/dnsmasq disable >> install.log
+		opkg update  >> install.log
+		opkg remove dnsmasq >> install.log
+fi
+
+opkg update >> install.log
+if [ "$(opkg list-upgradable)" != "" ]
+	then
+		echo 'upgrade installed Packages'
+  		opkg update --force-overwrite >> install.log
+  		opkg upgrade $(opkg list-upgradable | awk '{print $1}') --force-overwrite >> install.log
+fi 
+install_check >> install.log
+opkg update >> install.log
+if [ "$unbound_inst" = "" ]
+	then
+		if [ "$main_release" = "23" ]
+  			then
+  				echo $main_release
+      				opkg update >> install.log
+				opkg install nano wget curl openssh-sftp-server getdns drill bind-dig --force-overwrite >> install.log
+				opkg update >> install.log
+				opkg install kmod-nls-cp437 kmod-nls-iso8859-1 --force-overwrite >> install.log
+				opkg update >> install.log
+				opkg install tc luci-app-qos luci-app-nft-qos nft-qos --force-overwrite >> install.log
+				opkg update >> install.log
+				opkg install unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound --force-overwrite >> install.log
+				opkg update >> install.log
+				opkg install ca-certificates acme luci-app-acme acme-dnsapi --force-overwrite >> install.log
+				opkg update >> install.log
+				opkg install stubby tor tor-geoip dnsmasq-full --force-overwrite >> install.log
+			elif [ "$main_release" = "22" ]
+   				then
+       					echo $main_release
+	    				opkg update >> install.log
+					opkg install nano wget curl openssh-sftp-server getdns drill bind-dig --force-overwrite >> install.log
+					opkg update >> install.log
+					opkg install kmod-nls-cp437 kmod-nls-iso8859-1 --force-overwrite >> install.log
+					opkg update >> install.log
+					opkg install unbound-daemon unbound-anchor unbound-control unbound-host unbound-checkconf luci-app-unbound --force-overwrite >> install.log
+					opkg update >> install.log
+					opkg install ca-certificates acme acme-dnsapi luci-app-acme --force-overwrite >> install.log
+					opkg update >> install.log
+					opkg install stubby tor tor-geoip luci-app-qos luci-app-nft-qos nft-qos getdns dnsmasq-full --force-overwrite >> install.log
+					opkg update >> install.log
+					opkg install mwan3 luci-app-mwan3 --force-overwrite >> install.log
+			else 
+   					echo $main_release
+					opkg update >> install.log
+					opkg install nano wget curl openssh-sftp-server getdns drill bind-dig --force-overwrite >> install.log
+   					opkg update >> install.log
+   					opkg install kmod-usb-storage kmod-usb-storage-extras e2fsprogs kmod-fs-ext4 block-mount kmod-fs-vfat --force-overwrite >> install.log
+   					opkg update >> install.log
+   					opkg install kmod-nls-cp437 kmod-nls-iso8859-1 --force-overwrite >> install.log
+   					opkg update >> install.log
+   					opkg install unbound-daemon unbound-anchor unbound-control unbound-control-up unbound-host unbound-checkconf luci-app-unbound --force-overwrite >> install.log
+   					opkg update  >> install.log
+   					opkg install ca-certificates acme acme-dnsapi luci-app-acme --force-overwrite >> install.log
+   					opkg update >> install.log
+   					opkg install stubby tor tor-geoip ipset ipset-dns tc iptables-mod-ipopt luci-app-qos luci-app-nft-qos nft-qos getdns --force-overwrite >> install.log
+   					opkg update >> install.log
+   					opkg install mwan3 luci-app-mwan3 dnsmasq-full --force-overwrite >> install.log
+		fi
+   			opkg update >> install.log
+fi
+
+opkg update >> install.log
+
+		fi
+   		opkg update >> install.log
+fi
+
+opkg update >> install.log
+if [ "$iptables_inst" != "" ] 
+	then
+		echo 'remove iptable-Packages' 
+  		opkg remove iptable* --force-removal-of-dependent-packages >> install.log
+fi
+
+if [ "$odhcpd_inst" != "" ] 
+	then
+		echo 'remove odhcpd-Packages'
+  		opkg remove odhc* --force-removal-of-dependent-packages >> install.log
+fi
+echo 'install opkg'
+
+/etc/init.d/dnsmasq enable >> install.log
+/etc/init.d/dnsmasq start >> install.log
+clear
+echo '########################################################'
+echo '#                                                      #'
+echo '#                 CyberSecurity-Box                    #'
+echo '#                                                      #'
+echo '# local Privacy for Voice-Assistent Smart-TV SmartHome #'
+echo '#                                                      #'
+echo '########################################################'
+echo
+echo 'Software Packeges installed'
+view_config
+}
+
+install_update_() {
+echo
+echo 'Install Software'
+echo
+echo 'Please wait ....'
+echo
+echo 'On Error enter logread'
+echo
+if [ "$dnsmasq_inst" != "" ]
+	then
+		/etc/init.d/dnsmasq stop >> install.log
+		/etc/init.d/dnsmasq disable >> install.log
 		opkg update >> install.log
 		opkg remove dnsmasq >> install.log
 fi
