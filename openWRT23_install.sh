@@ -3493,12 +3493,14 @@ set_tor() {
 
 # Configure Tor client
 cat << EOF >> /etc/tor/torrc
+
 AutomapHostsOnResolve 1
 VirtualAddrNetworkIPV4 10.192.0.0/10
 VirtualAddrNetworkIPv6 fc00::/7
 
-SocksListenAddress 127.0.0.1
-SocksListenAddress [0::1]
+#Sandbox 1
+#SocksListenAddress 127.0.0.1
+#SocksListenAddress [0::1]
 
 ControlPort 9051
 CookieAuthentication 1
@@ -3508,42 +3510,55 @@ DNSPort 127.0.0.1:9153
 
 TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
-SocksPort 9050
-SocksPort 9150
-SocksPort 9100
+SocksPort 9050 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort 9150 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort 9100 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
-ORPort 127.0.0.1:9049
-DirPort 9030
+#ORPort 127.0.0.1:9049
+#DirPort 9030
 
-HTTPTunnelPort 9060
+HTTPTunnelPort 9060 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
 DisableDebuggerAttachment 1
 DisableAllSwap 1
 
+KeepalivePeriod 3
+NewCircuitPeriod 7
+NumDirectoryGuards 5
+
+
+#DirCache 0
+
 ExitPolicy reject *:*
 #ExitPolicy set Node Type. Relay
-RelayBandwidthRate 10000 KB
-RelayBandwidthBurst 50000 KB
-DisableDebuggerAttachment 0
-AccountingStart day 06:00
-AccountingMax 50 GBytes
+RelayBandwidthRate 9000 KB
+RelayBandwidthBurst 45000 KB
+
+AccountingStart day 06:37
+AccountingMax 42.5 GBytes
+
 
 NumCPUs 1
 
-#only secure exitnodes
+##only secure exitnodes
 StrictNodes 1
 GeoIPExcludeUnknown 1
+
+##MapAddress dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion 127.0.0.1 
+
+HardwareAccel 1
 
 ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
 ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
 
 SafeSocks 1
-WarnUnsafeSocks 1
-#Log warn syslog
+#WarnUnsafeSocks 1
+##Log warn syslog
 AvoidDiskWrites 1
 RunAsDaemon 1
 Nickname EnemyOneEU
+ContactInfo Cyb3r4nd1@protonmail.com
 
 ## ServerDNSResolvConfFile filename
 ## ServerDNSAllowBrokenConfig 0|1
@@ -3553,117 +3568,8 @@ Nickname EnemyOneEU
 ##ReachableAddresses accept *:443, reject *:*
 ##ReachableORAddresses *:443
 
-DataDirectory /var/lib/tor
+#DataDirectory /var/lib/tor
 User tor
-EOF
-}
-
-set_tor_old() {
-/etc/init.d/tor stop >> install.log
-/etc/init.d/log restart >> install.log
-
-# Configure Tor client
-cat << EOF > /etc/tor/main
-AutomapHostsOnResolve 1
-VirtualAddrNetworkIPV4 10.192.0.0/10
-VirtualAddrNetworkIPv6 fc00::/7
-
-SocksListenAddress 127.0.0.1
-SocksListenAddress $(echo $SERVER_ip)
-SocksListenAddress $(echo $HCONTROL_ip)
-SocksListenAddress $(echo $CONTROL_ip)
-SocksListenAddress $(echo $INET_ip)
-SocksListenAddress [0::1]
-
-ControlPort 9051
-
-DNSPort 127.0.0.1:9053
-DNSPort 127.0.0.1:9153
-#DNSPort 127.0.0.1:853
-#DNSPort 127.0.0.1:53
-#DNSPort 54
-#DNSPort 9053
-#DNSPort 9153
-#DNSPort 853
-#DNSPort 54
-
-TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-
-#SocksPort ist der Port für die Clientverbindung
-SocksPort 9050
-SocksPort 9150
-SocksPort 9100
-SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-
-ORPort 9049
-DirPort 9030
-#ORPort empfängt Daten aus dem Tor Netzwerk im Internet
-#ORPort $(echo $WAN_ip):9049
-#DirPort zum Spiegeln der Tor-Server-Adressen
-#DirPort $(echo $WAN_ip):9030
-
-HTTPTunnelPort 9060
-
-ExitPolicy reject *:*
-#ExitPolicy stellt den Node Type ein. Hier Weiterleitung
-RelayBandwidthRate 10000 KB
-RelayBandwidthBurst 50000 KB
-DisableDebuggerAttachment 0
-AccountingStart day 06:00
-AccountingMax 50 GBytes
-
-NumCPUs 1
-
-#Nur sichere Exitnodes Benutzen
-StrictExitNodes 1 # war aktiv
-GeoIPExcludeUnknown 1
-
-ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
-ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
-
-SafeSocks 1
-WarnUnsafeSocks 1
-#Log warn syslog
-#Das Schreiben auf die Disk verringern AvoidDiskWrites 1
-AvoidDiskWrites 1
-RunAsDaemon 1
-Nickname EnemyOneEU
-AutomapHostsSuffixes .onion,.exit
-
-## Tor hidden sites do not have real IP addresses. This specifies what range of
-## IP addresses will be handed to the application as "cookies" for .onion names.
-## Of course, you should pick a block of addresses which you aren't going to
-## ever need to actually connect to. This is similar to the MapAddress feature
-## of the main tor daemon.
-## OnionAddrRange 127.42.42.0/24
-##
-## ServerDNSResolvConfFile filename
-## ServerDNSAllowBrokenConfig 0|1
-## ServerDNSSearchDomains 1
-##
-## CacheIPv4DNS 1
-##
-## HiddenServiceDir /home/pi/hidden_service/
-## HiddenServicePort 80 192.168.175.250:80
-##
-## HiddenServiceDir /var/lib/tor/other_hidden_service/
-## HiddenServicePort 80 127.0.0.1:80
-## HiddenServicePort 22 127.0.0.1:22
-##
-## SOCKS5 Username and Password. This is used to isolate the torsocks connection
-## circuit from other streams in Tor. Use with option IsolateSOCKSAuth (on by
-## default) in tor(1). TORSOCKS_USERNAME and TORSOCKS_PASSWORD environment
-## variable overrides these options.
-## SOCKS5Username <username>
-## SOCKS5Password <password>
-##
-## Log notice file /var/log/tor/tor-notices.log
-ReachableAddresses accept *:443, reject *:*
-ReachableORAddresses *:443
-
-DataDirectory /var/lib/tor
-User tor
-
 EOF
 }
 
