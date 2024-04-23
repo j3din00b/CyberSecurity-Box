@@ -243,12 +243,12 @@ if [ "$ADGUARD_ACTIVE" = "" ]
            
         elif [ "$ADGUARD_ACTIVE" = "y" ]
                 then
-													AD_GUARD='1'
+			AD_GUARD='1'
         else
             AD_GUARD='0'
 fi
 
-
+echo
 TOR_ONION='0'
 echo
 read -p 'Use TOR(Onion)-Network? [Y/n] ' -s  -n 1 TOR_ACTIVE
