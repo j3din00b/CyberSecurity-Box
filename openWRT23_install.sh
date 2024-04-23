@@ -477,7 +477,8 @@ if [ "$(opkg list-upgradable)" != "" ]
   		opkg update --force-overwrite >> install.log
   		opkg upgrade $(opkg list-upgradable | awk '{print $1}') --force-overwrite >> install.log
 fi 
-install_check >> install.log
+echo 'check if installed'
+install_check #>> install.log
 opkg update >> install.log
 if [ "$unbound_inst" = "" ]
 	then
