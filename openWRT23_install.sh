@@ -3600,86 +3600,90 @@ set_tor() {
 /etc/init.d/tor stop >> install.log
 /etc/init.d/log restart >> install.log
 
-# Configure Tor client
-cat << EOF >> /etc/tor/torrc
 
-AutomapHostsOnResolve 1
-VirtualAddrNetworkIPV4 10.192.0.0/10
-VirtualAddrNetworkIPv6 fc00::/7
+if [ "echo $(cat /etc/tor/torrc | grep 'ContactInfo C')" != "" ] 
+	then
+	# Configure Tor client
+	cat << EOF >> /etc/tor/torrc
 
-#Sandbox 1
-#SocksListenAddress 127.0.0.1
-#SocksListenAddress [0::1]
+		AutomapHostsOnResolve 1
+		VirtualAddrNetworkIPV4 10.192.0.0/10
+		VirtualAddrNetworkIPv6 fc00::/7
 
-ControlPort 9051
-CookieAuthentication 1
+		#Sandbox 1
+		#SocksListenAddress 127.0.0.1
+		#SocksListenAddress [0::1]
 
-DNSPort 127.0.0.1:9053
-DNSPort 127.0.0.1:9153
+		ControlPort 9051
+		CookieAuthentication 1
 
-TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+		DNSPort 127.0.0.1:9053
+		DNSPort 127.0.0.1:9153
 
-SocksPort 9050 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-SocksPort 9150 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-SocksPort 9100 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+		TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
-#ORPort 127.0.0.1:9049
-#DirPort 9030
+		SocksPort 9050 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+		SocksPort 9150 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+		SocksPort 9100 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+		SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
-HTTPTunnelPort 9060 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+		#ORPort 127.0.0.1:9049
+		#DirPort 9030
 
-DisableDebuggerAttachment 1
-DisableAllSwap 1
+		HTTPTunnelPort 9060 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
 
-KeepalivePeriod 3
-NewCircuitPeriod 7
-NumDirectoryGuards 5
+		DisableDebuggerAttachment 1
+		DisableAllSwap 1
 
-
-#DirCache 0
-
-ExitPolicy reject *:*
-#ExitPolicy set Node Type. Relay
-RelayBandwidthRate 9000 KB
-RelayBandwidthBurst 45000 KB
-
-AccountingStart day 06:37
-AccountingMax 42.5 GBytes
+		KeepalivePeriod 3
+		NewCircuitPeriod 7
+		NumDirectoryGuards 5
 
 
-NumCPUs 1
+		#DirCache 0
 
-##only secure exitnodes
-StrictNodes 1
-GeoIPExcludeUnknown 1
+		ExitPolicy reject *:*
+		#ExitPolicy set Node Type. Relay
+		RelayBandwidthRate 9000 KB
+		RelayBandwidthBurst 45000 KB
 
-##MapAddress dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion 127.0.0.1 
+		AccountingStart day 06:37
+		AccountingMax 42.5 GBytes
 
-HardwareAccel 1
 
-ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
-ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
+		NumCPUs 1
 
-SafeSocks 1
-#WarnUnsafeSocks 1
-##Log warn syslog
-AvoidDiskWrites 1
-RunAsDaemon 1
-Nickname EnemyOneEU
-ContactInfo Cyb3r4nd1@protonmail.com
+		##only secure exitnodes
+		StrictNodes 1
+		GeoIPExcludeUnknown 1
 
-## ServerDNSResolvConfFile filename
-## ServerDNSAllowBrokenConfig 0|1
-## ServerDNSSearchDomains 1
-##
-##CacheIPv4DNS 1
-##ReachableAddresses accept *:443, reject *:*
-##ReachableORAddresses *:443
+		##MapAddress dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion 127.0.0.1 
 
-#DataDirectory /var/lib/tor
-User tor
-EOF
+		HardwareAccel 1
+
+		ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
+		ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
+
+		SafeSocks 1
+		#WarnUnsafeSocks 1
+		##Log warn syslog
+		AvoidDiskWrites 1
+		RunAsDaemon 1
+		Nickname EnemyOneEU
+		ContactInfo Cyb3r4nd1@protonmail.com
+
+		## ServerDNSResolvConfFile filename
+		## ServerDNSAllowBrokenConfig 0|1
+		## ServerDNSSearchDomains 1
+		##
+		##CacheIPv4DNS 1
+		##ReachableAddresses accept *:443, reject *:*
+		##ReachableORAddresses *:443
+
+		#DataDirectory /var/lib/tor
+	EOF
+
+fi
 }
 
 set_tor_old() {
@@ -3847,6 +3851,7 @@ processes=$(uci commit && reload_config)
 wait $processesg >> install.log
 
 /etc/init.d/tor start  >> install.log
+
 
 echo 
 echo 'Tor-Onion-Services activated'
