@@ -20802,7 +20802,7 @@ view_config
 set_dhcp() {
 if [ "$dnsmasq_inst" != "" ]
 	then
-  		uci delete dhcp.@dnsmasq[-1] >/dev/
+  		uci delete dhcp.@dnsmasq[-1] >/dev/null
     		processes=$(uci commit && reload_config)
 		wait $processes >/dev/null
 
