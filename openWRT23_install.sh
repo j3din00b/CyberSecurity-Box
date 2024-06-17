@@ -3603,6 +3603,11 @@ set_tor() {
 
 if [ "echo $(cat /etc/tor/torrc | grep 'ContactInfo C')" == "" ] 
 	then
+		set_tor_sub;
+ fi
+ }
+
+ set_tor_sub(){
 	# Configure Tor client
 	cat << EOF >> /etc/tor/torrc
 
@@ -3682,12 +3687,9 @@ if [ "echo $(cat /etc/tor/torrc | grep 'ContactInfo C')" == "" ]
 
 		#DataDirectory /var/lib/tor
 	EOF
-
-	fi
-
 }
 
-set_tor_old() {
+set_tor_sub_old() {
 /etc/init.d/tor stop >> install.log
 /etc/init.d/log restart >> install.log
 
