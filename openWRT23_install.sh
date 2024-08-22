@@ -12,14 +12,17 @@ echo '########################################################'
 #Firewall Pihole Unbound Tor Transparentproxy
 
 view_config()  {
+echo >> install.log
 echo
 echo 'Your Config is:'
+echo
+echo 'DNS-Server:           '$DNS_IP
 echo
 echo 'DNS-Relay Port:       '$DNSMASQ_Relay_port
 echo 'Tor/Onion:            '$TOR_ONION
 echo 'Firewall:             '$FW_HSactive
 echo
-echo 'Client-WiFi SSID:       '$INET_ssid
+echo 'Client-WiFi SSID:     '$INET_ssid
 echo 'Key:                  '$WIFI_PASS
 echo 'IP:                   '$INET_net
 echo
@@ -61,6 +64,8 @@ echo
 
 ask_parameter() {
 
+echo 'Release: '$main_release >> install.log
+
 release=$(cat /etc/openwrt_release | grep "DISTRIB_RELEASE" | cut -f2 -d '=')
 revision=$(cat /etc/openwrt_release | grep "DISTRIB_REVISION" | cut -f2 -d '=')
 revision=${revision::-1}
@@ -68,13 +73,20 @@ release=${release::-1}
 revision=${revision:1}
 release=${release:1}
 main_release=$(cat /etc/openwrt_release | grep "DISTRIB_RELEASE" | cut -f2 -d '=' | cut -f1 -d '.' | cut -c 2-)
+architecture=$(cat /etc/openwrt_release | grep "ARCH" | cut -f2 -d '=')
+target=$(cat /etc/openwrt_release | grep "TARGET" | cut -f2 -d '=')
+architecture=${architecture::-1}
+target=${target::-1}
+architecture=${architecture:1}
+target=${target:1}
+
 
 echo '--------------------------------------------------------'
 echo '       Current Version ' $release','  $revision
 echo '--------------------------------------------------------'
-echo 
-
-echo 'Release: '$main_release >> install.log
+echo 'Target '$target
+echo
+echo 'Architecture ' $architecture
 #Localaddresen
 LOCALADDRESS="127.192.0.1/10"
 
