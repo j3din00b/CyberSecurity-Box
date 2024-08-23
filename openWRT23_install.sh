@@ -1,6 +1,6 @@
 #!/bin/sh
 clear
-
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -64,8 +64,6 @@ echo
 
 ask_parameter() {
 
-echo 'Release: '$main_release >> install.log
-
 release=$(cat /etc/openwrt_release | grep "DISTRIB_RELEASE" | cut -f2 -d '=')
 revision=$(cat /etc/openwrt_release | grep "DISTRIB_REVISION" | cut -f2 -d '=')
 revision=${revision::-1}
@@ -87,6 +85,8 @@ echo '--------------------------------------------------------'
 echo 'Target '$target
 echo
 echo 'Architecture ' $architecture
+
+echo 'Release: '$main_release >> install.log
 #Localaddresen
 LOCALADDRESS="127.192.0.1/10"
 
@@ -344,6 +344,23 @@ if [ "$DNS_PORT" = "" ]
     				UNBOUND='0'
 	fi
 
+VLAN_ENABLE='0'
+echo
+echo
+read -p 'Would you like separate Networks for each Device-Category? [Y/n] ' -s  -n 1 VLAN_ACTIVE
+if [ "$VLAN_ACTIVE" = "" ]
+	then
+		VLAN_ENABLE='1'
+	elif [ "$VLAN_ACTIVE" = "y" ]
+ 		then
+		VLAN_ENABLE='1'
+ 	else
+		VLAN_ENABLE='0'
+fi
+
+echo
+
+
 if [ ! -z "$6" ]
 	then
 		SECURE_RULESW=$6
@@ -351,7 +368,6 @@ if [ ! -z "$6" ]
 		SECURE_RULES='y'
 fi
 
-echo
 echo
 read -p 'Activate HighSecure-Firewall? [Y/n] ' -s  -n 1 SECURE_RULES
 
@@ -561,6 +577,7 @@ echo 'install opkg'
 /etc/init.d/dnsmasq enable >> install.log
 /etc/init.d/dnsmasq start >> install.log
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -636,6 +653,7 @@ echo 'install opkg'
 /etc/init.d/dnsmasq enable >> install.log
 /etc/init.d/dnsmasq start >> install.log
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -1353,6 +1371,16 @@ echo
 }
 
 customize_firmware() {
+FILE=/www/luci-static/resources/view/dashboard/css/c*.css
+if [ ! -f "$FILE" ]
+
+	then
+		customize_firmware_sub
+	fi
+
+}
+
+customize_firmware_sub() {
 uci set system.@system[0]=system
 uci set system.@system[0].ttylogin='0'
 uci set system.@system[0].log_size='64'
@@ -1420,8 +1448,8 @@ cat << EOF > /etc/openwrt_release
 DISTRIB_ID='CyberSecurity-Box'
 DISTRIB_RELEASE='$(echo $release)'
 DISTRIB_REVISION='$(echo $revision)'
-DISTRIB_TARGET='ipq40xx/generic'
-DISTRIB_ARCH='arm_cortex-a7_neon-vfpv4'
+DISTRIB_TARGET='$(echo $target)'
+DISTRIB_ARCH='$(echo $architecture)'
 DISTRIB_DESCRIPTION='CyberSecurity-Box $(echo $revision)'
 DISTRIB_TAINTS=''
 EOF
@@ -1431,22 +1459,22 @@ cat << EOF > /etc/device_info
 DEVICE_MANUFACTURER='@CyberAndi'
 DEVICE_MANUFACTURER_URL='https://cyberandi.tumblr.com/'
 DEVICE_PRODUCT='CyberSecurity-Box'
-DEVICE_REVISION='v0.75'
+DEVICE_REVISION='v0.78'
 
 EOF
 
+FILE=/root/openWRT*.sh
 if [ "$(ls openWRT*.sh)" != "" ]
 	then
 		cp openWRT*.sh /etc/openWRT_install.sh
 fi
+
 chmod 0755 /etc/openWRT_install.sh
 
 cat << EOF > /etc/sysupgrade.conf
 ## This file contains files and directories that should
 ## be preserved during an upgrade.
 
-# /etc/example.conf
-# /etc/openvpn/
 /etc/openWRT_install.sh
 /etc/banner
 /etc/device_info
@@ -1463,39 +1491,52 @@ echo
 #sichere alte Konfiguration
 echo 'Sichere alte Konfiguration'
 #iptables-save > rules.v4_old_$datum.bkp
-if [ "$(ls /www/luci-static/bootstrap/c*.css)" != "" ]
+
+FILE=/www/luci-static/bootstrap/OCR-A.ttf
+if [ ! -f "$FILE" ] 
 	then
-		processes=$(rm /www/luci-static/bootstrap/c*.css)
+		if [ "$(ls /www/luci-static/bootstrap/c*.css)" != "" ]
+			then
+				processes=$(rm /www/luci-static/bootstrap/c*.css)
+		fi
+
+		wait $processes
+		if [ "$(ls /www/luci-static/resources/view/dashboard/css/c*.css)" != "" ]
+			then
+				processes=$(rm /www/luci-static/resources/view/dashboard/css/c*.css)
+		fi
+
+		wait $processes
+		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.png -P /www/luci-static/bootstrap/)
+		wait $processes
+		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.svg -P /www/luci-static/bootstrap/)
+		wait $processes
+		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberAndi.svg -P /www/luci-static/bootstrap/)
+		wait $processes1
+		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/cascade.css -P /www/luci-static/bootstrap/)
+		wait $processes1
+		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.ttf -P /www/luci-static/bootstrap/)
+		wait $processes1
+		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.woff -P /www/luci-static/bootstrap/)
+		wait $processes1
+
 fi
 
-wait $processes
-if [ "$(ls /www/luci-static/resources/view/dashboard/css/c*.css)" != "" ]
-	then
-		processes=$(rm /www/luci-static/resources/view/dashboard/css/c*.css)
-fi
-wait $processes
-processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.png -P /www/luci-static/bootstrap/)
-wait $processes
-processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.svg -P /www/luci-static/bootstrap/)
-wait $processes
-processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberAndi.svg -P /www/luci-static/bootstrap/)
-wait $processes1
-processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/cascade.css -P /www/luci-static/bootstrap/)
-wait $processes1
-processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.ttf -P /www/luci-static/bootstrap/)
-wait $processes1
-processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.woff -P /www/luci-static/bootstrap/)
-wait $processes1
-wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/custom.css -P /www/luci-static/resources/view/dashboard/css/
 
-mv /www/luci-static/resources/view/status/include/*_system.js /www/luci-static/resources/view/status/include/90_system.js
-mv /www/luci-static/resources/view/status/include/*_memory.js /www/luci-static/resources/view/status/include/10_memory.js
-mv /www/luci-static/resources/view/status/include/*_storage.js /www/luci-static/resources/view/status/include/15_storage.js
-mv /www/luci-static/resources/view/status/include/*_dsl.js /www/luci-static/resources/view/status/include/20_dsl.js
-mv /www/luci-static/resources/view/status/include/*_ports.js /www/luci-static/resources/view/status/include/21_ports.js
-mv /www/luci-static/resources/view/status/include/*_network.js /www/luci-static/resources/view/status/include/22_network.js
-mv /www/luci-static/resources/view/status/include/*_dhcp.js /www/luci-static/resources/view/status/include/25_dhcp.js
-mv /www/luci-static/resources/view/status/include/*_wifi.js /www/luci-static/resources/view/status/include/30_wifi.js
+FILE1=/www/luci-static/resources/view/dashboard/css/c*.css
+if [ ! -f "$FILE" ]
+	then
+		wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/custom.css -P /www/luci-static/resources/view/dashboard/css/
+
+		mv /www/luci-static/resources/view/status/include/*_system.js /www/luci-static/resources/view/status/include/90_system.js
+		mv /www/luci-static/resources/view/status/include/*_memory.js /www/luci-static/resources/view/status/include/10_memory.js
+		mv /www/luci-static/resources/view/status/include/*_storage.js /www/luci-static/resources/view/status/include/15_storage.js
+		mv /www/luci-static/resources/view/status/include/*_dsl.js /www/luci-static/resources/view/status/include/20_dsl.js
+		mv /www/luci-static/resources/view/status/include/*_ports.js /www/luci-static/resources/view/status/include/21_ports.js
+		mv /www/luci-static/resources/view/status/include/*_network.js /www/luci-static/resources/view/status/include/22_network.js
+		mv /www/luci-static/resources/view/status/include/*_dhcp.js /www/luci-static/resources/view/status/include/25_dhcp.js
+		mv /www/luci-static/resources/view/status/include/*_wifi.js /www/luci-static/resources/view/status/include/30_wifi.js
+fi
 
 
 echo
@@ -1503,13 +1544,24 @@ echo 'On Error enter logread'
 echo
 }
 
-create_hotspot() {
+create_hotspot(){
+	FILE=/www/CaptivePortal/pic
+	if [ ! -d "$FILE" ]
+		then
+			create_hotspot_sub
+	fi
+
+}
+
+create_hotspot_sub() {
+
+FILE=/www/CaptivePortal/pic
 
 mkdir -p /www/router
 mkdir -p /www/redirect
 mkdir -p /www/CaptivePortal
-mkdir -p /www/generate_204
-mkdir -p  /www/CaptivePortal/pic
+mkdir -p /www/generate_204	
+mkdir -p /www/CaptivePortal/pic
 
 
 wait $processes
@@ -1844,7 +1896,7 @@ echo
 create_vlan_bridge() {
 
 
-uci del dhcp.lan.ra_slaac
+uci del dhcp.lan.ra_slaac >/dev/null
 
 uci add network bridge-vlan
 uci set network.@bridge-vlan[-1].device='br-lan'
@@ -2051,6 +2103,7 @@ processes=$(uci commit && reload_config) wait $processes
 
 create_network() {
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -2245,6 +2298,7 @@ echo
 
 create_network_23() {
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -2522,6 +2576,7 @@ echo
 
 create_network_22() {
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -3339,6 +3394,10 @@ dig www.internic.net @1.1.1.1
 create_wlan() {
 uci -q delete wireless  >> install.log
 
+echo
+echo 'WIFI 11n'
+echo
+
 uci set wireless.radio0=wifi-device
 uci set wireless.radio0.type='mac80211'
 uci set wireless.radio0.path='platform/soc/a000000.wifi'
@@ -3347,10 +3406,16 @@ uci set wireless.radio0.country='DE'
 uci set wireless.radio0.channel='auto'
 uci set wireless.radio0.hwmode='11n'
 
+echo
+echo 'del WIFI 11n'
+echo
+
 if [ "echo $(uci show wireless | grep default_radio0)" != "" ] 
 	then
 		uci delete wireless.default_radio0
 fi
+
+
 uci set wireless.default_radio0=wifi-iface
 uci set wireless.default_radio0.device='radio0'
 uci set wireless.default_radio0.mode='ap'
@@ -3359,10 +3424,16 @@ uci set wireless.default_radio0.ssid=$TELEKOM_ssid
 uci set wireless.default_radio0.encryption='psk2'
 uci set wireless.default_radio0.network='TELEKOM'
 
+echo
+echo 'WIFI Telekom'
+echo
+
+
 if [ "echo $(uci show wireless | grep wifinet01)" != "" ] 
 	then
 		uci delete wireless.wifinet01
 fi
+
 uci set wireless.wifinet01=wifi-iface
 uci set wireless.wifinet01.device='radio0'
 uci set wireless.wifinet01.mode='ap'
@@ -3371,10 +3442,15 @@ uci set wireless.wifinet01.ssid=$SERVER_ssid
 uci set wireless.wifinet01.encryption='psk2'
 uci set wireless.wifinet01.network='SERVER'
 
+echo
+echo 'WIFI SERVER'
+echo
+
 if [ "echo $(uci show wireless | grep wifinet02)" != "" ] 
 	then
 		uci delete wireless.wifinet02
 fi
+
 uci set wireless.wifinet02=wifi-iface
 uci set wireless.wifinet02.device='radio0'
 uci set wireless.wifinet02.mode='ap'
@@ -3383,10 +3459,15 @@ uci set wireless.wifinet02.ssid=$HCONTROL_ssid
 uci set wireless.wifinet02.encryption='psk2'
 uci set wireless.wifinet02.network='HCONTROL'
 
+echo
+echo 'WIFI HCONTROL'
+echo
+
 if [ "echo $(uci show wireless | grep wifinet03)" != "" ] 
 	then
 		uci delete wireless.wifinet03
 fi
+
 uci set wireless.wifinet03=wifi-iface
 uci set wireless.wifinet03.device='radio0'
 uci set wireless.wifinet03.mode='ap'
@@ -3395,10 +3476,14 @@ uci set wireless.wifinet03.ssid=$CONTROL_ssid
 uci set wireless.wifinet03.encryption='psk2'
 uci set wireless.wifinet03.network='CONTROL'
 
+echo
+echo 'WIFI CONTROL'
+echo
 if [ "echo $(uci show wireless | grep wifinet04)" != "" ] 
 	then
 		uci delete wireless.wifinet04
 fi
+
 uci set wireless.wifinet04=wifi-iface
 uci set wireless.wifinet04.device='radio0'
 uci set wireless.wifinet04.mode='ap'
@@ -3407,10 +3492,15 @@ uci set wireless.wifinet04.ssid=$INET_ssid
 uci set wireless.wifinet04.encryption='psk2'
 uci set wireless.wifinet04.network='INET'
 
+echo
+echo 'WIFI INET'
+echo
+
 if [ "echo $(uci show wireless | grep wifinet05)" != "" ] 
 	then
 		uci delete wireless.wifinet05
 fi
+
 uci set wireless.wifinet05=wifi-iface
 uci set wireless.wifinet05.device='radio0'
 uci set wireless.wifinet05.mode='ap'
@@ -3419,10 +3509,14 @@ uci set wireless.wifinet05.ssid=$VOICE_ssid
 uci set wireless.wifinet05.encryption='psk2'
 uci set wireless.wifinet05.network='VOICE'
 
+echo
+echo 'WIFI VOICE'
+echo
 if [ "echo $(uci show wireless | grep wifinet06)" != "" ] 
 	then
 		uci delete wireless.wifinet06
 fi
+
 uci set wireless.wifinet06=wifi-iface
 uci set wireless.wifinet06.device='radio0'
 uci set wireless.wifinet06.mode='ap'
@@ -3431,10 +3525,14 @@ uci set wireless.wifinet06.ssid=$ENTERTAIN_ssid
 uci set wireless.wifinet06.encryption='psk2'
 uci set wireless.wifinet06.network='ENTERTAIN'
 
+echo
+echo 'WIFI ENTERTAIN'
+echo
 if [ "echo $(uci show wireless | grep wifinet07)" != "" ] 
 	then
 		uci delete wireless.wifinet07
 fi
+
 uci set wireless.wifinet07=wifi-iface
 uci set wireless.wifinet07.device='radio0'
 uci set wireless.wifinet07.mode='ap'
@@ -3443,6 +3541,9 @@ uci set wireless.wifinet07.ssid=$GUEST_ssid
 uci set wireless.wifinet07.encryption='psk2'
 uci set wireless.wifinet07.network='GUEST'
 
+echo
+echo 'WIFI GUEST'
+echo
 if [ "echo $(uci show wireless | grep wifinet08)" != "" ] 
 	then
 		uci delete wireless.wifinet08
@@ -3455,6 +3556,10 @@ uci set wireless.wifinet08.ssid=$CMOVIE_ssid
 uci set wireless.wifinet08.encryption='psk2'
 uci set wireless.wifinet08.network='CMOVIE'
 
+echo
+echo 'WIFI CMOVIE'
+echo
+
 uci set wireless.radio1=wifi-device
 uci set wireless.radio1.type='mac80211'
 uci set wireless.radio1.channel='auto'
@@ -3463,10 +3568,19 @@ uci set wireless.radio1.path='platform/soc/a800000.wifi'
 uci set wireless.radio1.htmode='VHT80'
 uci set wireless.radio1.country='DE'
 
+echo
+echo 'WIFI 11a'
+echo
+
 if [ "echo $(uci show wireless | grep default_radio1)" != "" ] 
 	then
 		uci delete wireless.default_radio1
 fi
+
+echo
+echo 'WIFI TELEKOM'
+echo
+
 uci set wireless.default_radio1=wifi-iface
 uci set wireless.default_radio1.device='radio1'
 uci set wireless.default_radio1.mode='ap'
@@ -3479,6 +3593,11 @@ if [ "echo $(uci show wireless | grep wifinet09)" != "" ]
 	then
 		uci delete wireless.wifinet09
 fi
+
+echo
+echo 'WIFI SERVER'
+echo
+
 uci set wireless.wifinet09=wifi-iface
 uci set wireless.wifinet09.device='radio1'
 uci set wireless.wifinet09.mode='ap'
@@ -3491,6 +3610,10 @@ if [ "echo $(uci show wireless | grep wifinet10)" != "" ]
 	then
 		uci delete wireless.wifinet10
 fi
+
+echo
+echo 'WIFI HCONTROL'
+echo
 uci set wireless.wifinet10=wifi-iface
 uci set wireless.wifinet10.ssid=$HCONTROL_ssid
 uci set wireless.wifinet10.encryption='psk2'
@@ -3503,6 +3626,10 @@ if [ "echo $(uci show wireless | grep wifinet11)" != "" ]
 	then
 		uci delete wireless.wifinet1
 fi
+
+echo
+echo 'WIFI CONTROL'
+echo
 uci set wireless.wifinet11=wifi-iface
 uci set wireless.wifinet11.ssid=$CONTROL_ssid
 uci set wireless.wifinet11.encryption='psk2'
@@ -3515,6 +3642,10 @@ if [ "echo $(uci show wireless | grep wifinet12)" != "" ]
 	then
 		uci delete wireless.wifinet12
 fi
+
+echo
+echo 'WIFI INET'
+echo
 uci set wireless.wifinet12=wifi-iface
 uci set wireless.wifinet12.device='radio1'
 uci set wireless.wifinet12.mode='ap'
@@ -3527,6 +3658,10 @@ if [ "echo $(uci show wireless | grep wifinet13)" != "" ]
 	then
 		uci delete wireless.wifinet13
 fi
+
+echo
+echo 'WIFI VOICE'
+echo
 uci set wireless.wifinet13=wifi-iface
 uci set wireless.wifinet13.encryption='psk2'
 uci set wireless.wifinet13.device='radio1'
@@ -3539,6 +3674,10 @@ if [ "echo $(uci show wireless | grep wifinet14)" != "" ]
 	then
 		uci delete wireless.wifinet14
 fi
+
+echo
+echo 'WIFI ENTERTAIN'
+echo
 uci set wireless.wifinet14=wifi-iface
 uci set wireless.wifinet14.encryption='psk2'
 uci set wireless.wifinet14.device='radio1'
@@ -3551,6 +3690,10 @@ if [ "echo $(uci show wireless | grep wifinet15)" != "" ]
 	then
 		uci delete wireless.wifinet15
 fi
+
+echo
+echo 'WIFI GUEST'
+echo
 uci set wireless.wifinet15=wifi-iface
 uci set wireless.wifinet15.encryption='psk2'
 uci set wireless.wifinet15.device='radio1'
@@ -3563,6 +3706,10 @@ if [ "echo $(uci show wireless | grep wifinet16)" != "" ]
 	then
 		uci delete wireless.wifinet16
 fi
+
+echo
+echo 'WIFI CMOVIE'
+echo
 uci set wireless.wifinet16=wifi-iface
 uci set wireless.wifinet16.encryption='psk2'
 uci set wireless.wifinet16.device='radio1'
@@ -3575,6 +3722,11 @@ if [ "echo $(uci show wireless | grep wifinet17)" != "" ]
 	then
 		uci delete wireless.wifinet17
 fi
+
+echo
+echo 'WIFI TELEKOM'
+echo
+
 uci set wireless.wifinet17=wifi-iface
 uci set wireless.wifinet17.encryption='psk2'
 uci set wireless.wifinet17.device='radio0'
@@ -3587,6 +3739,11 @@ if [ "echo $(uci show wireless | grep wifinet18)" != "" ]
 	then
 		uci delete wireless.wifinet18
 fi
+
+echo
+echo 'WIFI VODAFONE'
+echo
+
 uci set wireless.wifinet18=wifi-iface
 uci set wireless.wifinet18.encryption='psk2'
 uci set wireless.wifinet18.device='radio1'
@@ -3613,92 +3770,354 @@ set_tor() {
 /etc/init.d/tor stop >> install.log
 /etc/init.d/log restart >> install.log
 
-if [ "echo $(cat /etc/tor/torrc | grep 'ContactInfo C')" == "" ] 
+echo
+if grep -q 'ContactInfo C' /etc/tor/torrc	
 	then
-		set_tor_sub;
- fi
+		echo 'The Tor-Setup is done at least'
+	else
+		set_tor_sub
+fi
+echo
+
  }
 
- set_tor_sub(){
-	# Configure Tor client
-	cat << EOF >> /etc/tor/torrc
+set_tor_sub() {
+# Configure Tor client
 
-		AutomapHostsOnResolve 1
-		VirtualAddrNetworkIPV4 10.192.0.0/10
-		VirtualAddrNetworkIPv6 fc00::/7
+echo 'Start Tor-Setup'
 
-		#Sandbox 1
-		#SocksListenAddress 127.0.0.1
-		#SocksListenAddress [0::1]
+cat << EOF > /etc/tor/torrc
 
-		ControlPort 9051
-		CookieAuthentication 1
+## Configuration file for a typical Tor user
+## Last updated 28 February 2019 for Tor 0.3.5.1-alpha.
+## (may or may not work for much older or much newer versions of Tor.)
+##
+## Lines that begin with "## " try to explain what's going on. Lines
+## that begin with just "#" are disabled commands: you can enable them
+## by removing the "#" symbol.
+##
+## See 'man tor', or https://www.torproject.org/docs/tor-manual.html,
+## for more options you can use in this file.
+##
+## Tor will look for this file in various places based on your platform:
+## https://support.torproject.org/tbb/tbb-editing-torrc/
 
-		DNSPort 127.0.0.1:9053
-		DNSPort 127.0.0.1:9153
+## Tor opens a SOCKS proxy on port 9050 by default -- even if you don't
+## configure one below. Set "SOCKSPort 0" if you plan to run Tor only
+## as a relay, and not make any local application connections yourself.
+#SOCKSPort 9050 # Default: Bind to localhost:9050 for local connections.
+#SOCKSPort 192.168.0.1:9100 # Bind to this address:port too.
 
-		TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+## Entry policies to allow/deny SOCKS requests based on IP address.
+## First entry that matches wins. If no SOCKSPolicy is set, we accept
+## all (and only) requests that reach a SOCKSPort. Untrusted users who
+## can access your SOCKSPort may be able to learn about the connections
+## you make.
+#SOCKSPolicy accept 192.168.0.0/16
+#SOCKSPolicy accept6 FC00::/7
+#SOCKSPolicy reject *
 
-		SocksPort 9050 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-		SocksPort 9150 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-		SocksPort 9100 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
-		SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+## Logs go to stdout at level "notice" unless redirected by something
+## else, like one of the below lines. You can have as many Log lines as
+## you want.
+##
+## We advise using "notice" in most cases, since anything more verbose
+## may provide sensitive information to an attacker who obtains the logs.
+##
+## Send all messages of level 'notice' or higher to /var/log/tor/notices.log
+#Log notice file /var/log/tor/notices.log
+## Send every possible message to /var/log/tor/debug.log
+#Log debug file /var/log/tor/debug.log
+## Use the system log instead of Tor's logfiles
+Log notice syslog
+## To send all messages to stderr:
+#Log debug stderr
 
-		#ORPort 127.0.0.1:9049
-		#DirPort 9030
+## Uncomment this to start the process in the background... or use
+## --runasdaemon 1 on the command line. This is ignored on Windows;
+## see the FAQ entry if you want Tor to run as an NT service.
+#RunAsDaemon 1
 
-		HTTPTunnelPort 9060 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+## The directory for keeping all the keys/etc. By default, we store
+## things in $HOME/.tor on Unix, and in Application Data\tor on Windows.
+DataDirectory /var/lib/tor
 
-		DisableDebuggerAttachment 1
-		DisableAllSwap 1
+## The port on which Tor will listen for local connections from Tor
+## controller applications, as documented in control-spec.txt.
+#ControlPort 9051
+## If you enable the controlport, be sure to enable one of these
+## authentication methods, to prevent attackers from accessing it.
+#HashedControlPassword 16:872860B76453A77D60CA2BB8C1A7042072093276A3D701AD684053EC4C
+#CookieAuthentication 1
 
-		KeepalivePeriod 3
-		NewCircuitPeriod 7
-		NumDirectoryGuards 5
+############### This section is just for location-hidden services ###
+
+## Once you have configured a hidden service, you can look at the
+## contents of the file ".../hidden_service/hostname" for the address
+## to tell people.
+##
+## HiddenServicePort x y:z says to redirect requests on port x to the
+## address y:z.
+
+#HiddenServiceDir /var/lib/tor/hidden_service/
+#HiddenServicePort 80 127.0.0.1:80
+
+#HiddenServiceDir /var/lib/tor/other_hidden_service/
+#HiddenServicePort 80 127.0.0.1:80
+#HiddenServicePort 22 127.0.0.1:22
+
+################ This section is just for relays #####################
+#
+## See https://community.torproject.org/relay for details.
+
+## Required: what port to advertise for incoming Tor connections.
+#ORPort 9001
+## If you want to listen on a port other than the one advertised in
+## ORPort (e.g. to advertise 443 but bind to 9090), you can do it as
+## follows.  You'll need to do ipchains or other port forwarding
+## yourself to make this work.
+#ORPort 443 NoListen
+#ORPort 127.0.0.1:9090 NoAdvertise
+## If you want to listen on IPv6 your numeric address must be explicitly
+## between square brackets as follows. You must also listen on IPv4.
+#ORPort [2001:DB8::1]:9050
+
+## The IP address or full DNS name for incoming connections to your
+## relay. Leave commented out and Tor will guess.
+#Address noname.example.com
+
+## If you have multiple network interfaces, you can specify one for
+## outgoing traffic to use.
+## OutboundBindAddressExit will be used for all exit traffic, while
+## OutboundBindAddressOR will be used for all OR and Dir connections
+## (DNS connections ignore OutboundBindAddress).
+## If you do not wish to differentiate, use OutboundBindAddress to
+## specify the same address for both in a single line.
+#OutboundBindAddressExit 10.0.0.4
+#OutboundBindAddressOR 10.0.0.5
+
+## A handle for your relay, so people don't have to refer to it by key.
+## Nicknames must be between 1 and 19 characters inclusive, and must
+## contain only the characters [a-zA-Z0-9].
+## If not set, "Unnamed" will be used.
+#Nickname ididnteditheconfig
+
+## Define these to limit how much relayed traffic you will allow. Your
+## own traffic is still unthrottled. Note that RelayBandwidthRate must
+## be at least 75 kilobytes per second.
+## Note that units for these config options are bytes (per second), not
+## bits (per second), and that prefixes are binary prefixes, i.e. 2^10,
+## 2^20, etc.
+#RelayBandwidthRate 100 KBytes  # Throttle traffic to 100KB/s (800Kbps)
+#RelayBandwidthBurst 200 KBytes # But allow bursts up to 200KB (1600Kb)
+
+## Use these to restrict the maximum traffic per day, week, or month.
+## Note that this threshold applies separately to sent and received bytes,
+## not to their sum: setting "40 GB" may allow up to 80 GB total before
+## hibernating.
+##
+## Set a maximum of 40 gigabytes each way per period.
+#AccountingMax 40 GBytes
+## Each period starts daily at midnight (AccountingMax is per day)
+#AccountingStart day 00:00
+## Each period starts on the 3rd of the month at 15:00 (AccountingMax
+## is per month)
+#AccountingStart month 3 15:00
+
+## Administrative contact information for this relay or bridge. This line
+## can be used to contact you if your relay or bridge is misconfigured or
+## something else goes wrong. Note that we archive and publish all
+## descriptors containing these lines and that Google indexes them, so
+## spammers might also collect them. You may want to obscure the fact that
+## it's an email address and/or generate a new address for this purpose.
+##
+## If you are running multiple relays, you MUST set this option.
+##
+#ContactInfo Random Person <nobody AT example dot com>
+## You might also include your PGP or GPG fingerprint if you have one:
+#ContactInfo 0xFFFFFFFF Random Person <nobody AT example dot com>
+
+## Uncomment this to mirror directory information for others. Please do
+## if you have enough bandwidth.
+#DirPort 9030 # what port to advertise for directory connections
+## If you want to listen on a port other than the one advertised in
+## DirPort (e.g. to advertise 80 but bind to 9091), you can do it as
+## follows.  below too. You'll need to do ipchains or other port
+## forwarding yourself to make this work.
+#DirPort 80 NoListen
+#DirPort 127.0.0.1:9091 NoAdvertise
+## Uncomment to return an arbitrary blob of html on your DirPort. Now you
+## can explain what Tor is if anybody wonders why your IP address is
+## contacting them. See contrib/tor-exit-notice.html in Tor's source
+## distribution for a sample.
+#DirPortFrontPage /etc/tor/tor-exit-notice.html
+
+## Uncomment this if you run more than one Tor relay, and add the identity
+## key fingerprint of each Tor relay you control, even if they're on
+## different networks. You declare it here so Tor clients can avoid
+## using more than one of your relays in a single circuit. See
+## https://support.torproject.org/relay-operators/multiple-relays/
+## However, you should never include a bridge's fingerprint here, as it would
+## break its concealability and potentially reveal its IP/TCP address.
+##
+## If you are running multiple relays, you MUST set this option.
+##
+## Note: do not use MyFamily on bridge relays.
+#MyFamily $keyid,$keyid,...
+
+## Uncomment this if you want your relay to be an exit, with the default
+## exit policy (or whatever exit policy you set below).
+## (If ReducedExitPolicy, ExitPolicy, or IPv6Exit are set, relays are exits.
+## If none of these options are set, relays are non-exits.)
+#ExitRelay 1
+
+## Uncomment this if you want your relay to allow IPv6 exit traffic.
+## (Relays do not allow any exit traffic by default.)
+#IPv6Exit 1
+
+## Uncomment this if you want your relay to be an exit, with a reduced set
+## of exit ports.
+#ReducedExitPolicy 1
+
+## Uncomment these lines if you want your relay to be an exit, with the
+## specified set of exit IPs and ports.
+##
+## A comma-separated list of exit policies. They're considered first
+## to last, and the first match wins.
+##
+## If you want to allow the same ports on IPv4 and IPv6, write your rules
+## using accept/reject *. If you want to allow different ports on IPv4 and
+## IPv6, write your IPv6 rules using accept6/reject6 *6, and your IPv4 rules
+## using accept/reject *4.
+##
+## If you want to _replace_ the default exit policy, end this with either a
+## reject *:* or an accept *:*. Otherwise, you're _augmenting_ (prepending to)
+## the default exit policy. Leave commented to just use the default, which is
+## described in the man page or at
+## https://support.torproject.org/relay-operators
+##
+## Look at https://support.torproject.org/abuse/exit-relay-expectations/
+## for issues you might encounter if you use the default exit policy.
+##
+## If certain IPs and ports are blocked externally, e.g. by your firewall,
+## you should update your exit policy to reflect this -- otherwise Tor
+## users will be told that those destinations are down.
+##
+## For security, by default Tor rejects connections to private (local)
+## networks, including to the configured primary public IPv4 and IPv6 addresses,
+## and any public IPv4 and IPv6 addresses on any interface on the relay.
+## See the man page entry for ExitPolicyRejectPrivate if you want to allow
+## "exit enclaving".
+##
+#ExitPolicy accept *:6660-6667,reject *:* # allow irc ports on IPv4 and IPv6 but no more
+#ExitPolicy accept *:119 # accept nntp ports on IPv4 and IPv6 as well as default exit policy
+#ExitPolicy accept *4:119 # accept nntp ports on IPv4 only as well as default exit policy
+#ExitPolicy accept6 *6:119 # accept nntp ports on IPv6 only as well as default exit policy
+#ExitPolicy reject *:* # no exits allowed
+
+## Bridge relays (or "bridges") are Tor relays that aren't listed in the
+## main directory. Since there is no complete public list of them, even an
+## ISP that filters connections to all the known Tor relays probably
+## won't be able to block all the bridges. Also, websites won't treat you
+## differently because they won't know you're running Tor. If you can
+## be a real relay, please do; but if not, be a bridge!
+##
+## Warning: when running your Tor as a bridge, make sure than MyFamily is
+## NOT configured.
+#BridgeRelay 1
+## By default, Tor will advertise your bridge to users through various
+## mechanisms like https://bridges.torproject.org/. If you want to run
+## a private bridge, for example because you'll give out your bridge
+## address manually to your friends, uncomment this line:
+#BridgeDistribution none
+
+## Configuration options can be imported from files or folders using the %include
+## option with the value being a path. This path can have wildcards. Wildcards are
+## expanded first, using lexical order. Then, for each matching file or folder, the following
+## rules are followed: if the path is a file, the options from the file will be parsed as if
+## they were written where the %include option is. If the path is a folder, all files on that
+## folder will be parsed following lexical order. Files starting with a dot are ignored. Files
+## on subfolders are ignored.
+## The %include option can be used recursively.
+#%include /etc/torrc.d/*.conf
+
+User tor
 
 
-		#DirCache 0
 
-		ExitPolicy reject *:*
-		#ExitPolicy set Node Type. Relay
-		RelayBandwidthRate 9000 KB
-		RelayBandwidthBurst 45000 KB
+AutomapHostsOnResolve 1
+VirtualAddrNetworkIPV4 10.192.0.0/10
+VirtualAddrNetworkIPv6 fc00::/7
 
-		AccountingStart day 06:37
-		AccountingMax 42.5 GBytes
+#Sandbox 1
+#SocksListenAddress 127.0.0.1
+#SocksListenAddress [0::1]
+
+ControlPort 9051
+CookieAuthentication 1
+DNSPort 127.0.0.1:9053
+DNSPort 127.0.0.1:9153
+
+TransPort 9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort 9050 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort 9150 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort 9100 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+SocksPort 9200 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+
+#ORPort 127.0.0.1:9049
+#DirPort 9030
+
+HTTPTunnelPort 9060 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+
+DisableDebuggerAttachment 1
+DisableAllSwap 1
+
+KeepalivePeriod 3
+NewCircuitPeriod 7
+NumDirectoryGuards 5
 
 
-		NumCPUs 1
+#DirCache 0
 
-		##only secure exitnodes
-		StrictNodes 1
-		GeoIPExcludeUnknown 1
+ExitPolicy reject *:*
+#ExitPolicy set Node Type. Relay
+RelayBandwidthRate 9000 KB
+RelayBandwidthBurst 45000 KB
 
-		##MapAddress dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion 127.0.0.1 
+AccountingStart day 06:37
+AccountingMax 42.5 GBytes
 
-		HardwareAccel 1
+NumCPUs 1
+##only secure exitnodes
+StrictNodes 1
+GeoIPExcludeUnknown 1
 
-		ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
-		ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
+##MapAddress dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion 127.0.0.1 
 
-		SafeSocks 1
-		#WarnUnsafeSocks 1
-		##Log warn syslog
-		AvoidDiskWrites 1
-		RunAsDaemon 1
-		Nickname EnemyOneEU
-		ContactInfo Cyb3r4nd1@protonmail.com
+HardwareAccel 1
 
-		## ServerDNSResolvConfFile filename
-		## ServerDNSAllowBrokenConfig 0|1
-		## ServerDNSSearchDomains 1
-		##
-		##CacheIPv4DNS 1
-		##ReachableAddresses accept *:443, reject *:*
-		##ReachableORAddresses *:443
+ExcludeNodes {AU}, {CA}, {FR}, {GB}, {NZ}, {US}, {DE}, {CH}, {JP}, {FR}, {SE}, {DK}, {NL}, {NO}, {IT}, {ES}, {BE}, {BG}, {EE}, {FI}, {GR}, {IL}, {SG}, {KR}, {HR}, {LV}, {LT}, {LU}, {MT}, {NO}, {AT}, {PL}, {PT}, {RO}, {RU}, {SE}, {SK}, {SI}, {CZ}, {HU}, {CY}, {EU}, {HU}, {UA}, {SZ}, {CS}, {TR}, {RS}, {MF}, {BL}, {RE}, {MK}, {ME}, {MY}, {HR}, {IE}, {PF}, {GF}, {CK}, {BA}  
+ExitNodes {CL}, {LI}, {LV}, {TW}, {AE}, {TH}, {IS}, {KW}, {PA}
 
-		#DataDirectory /var/lib/tor
-	EOF
+SafeSocks 1
+#WarnUnsafeSocks 1
+##Log warn syslog
+AvoidDiskWrites 1
+RunAsDaemon 1
+Nickname EnemyOneEU
+ContactInfo Cyb3r4nd1@protonmail.com
+
+## ServerDNSResolvConfFile filename
+## ServerDNSAllowBrokenConfig 0|1
+## ServerDNSSearchDomains 1
+##
+##CacheIPv4DNS 1
+##ReachableAddresses accept *:443, reject *:*
+##ReachableORAddresses *:443
+
+#DataDirectory /var/lib/tor
+
+EOF
 }
 
 set_tor_sub_old() {
@@ -3960,7 +4379,7 @@ echo
 
 set_unbound() {
 mkdir -p /etc/unbound/unbound.conf.d >> install.log
-curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache  >> install.log
+curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache >> install.log
 curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&showintro=0&mimetype=plaintext" > /etc/unbound/unbound.conf.d/unbound_ad_servers
 
 cat << EOF > /etc/hosts
@@ -4116,6 +4535,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4253,6 +4673,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4268,6 +4689,7 @@ view_config
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4468,6 +4890,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4483,6 +4906,7 @@ view_config
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4729,6 +5153,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4744,6 +5169,7 @@ view_config
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4903,6 +5329,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -4918,6 +5345,7 @@ view_config
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -5097,6 +5525,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -5112,6 +5541,7 @@ view_config
 
 #---------------------------------------------------------------------------------------------------------------------------------------------
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -5435,6 +5865,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -5448,8 +5879,10 @@ view_config
 
 /etc/init.d/unbound restart  >> install.log
 
+
 #---------------------------------------------------------------------------------------------------------------------------------------------
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -5462,8 +5895,159 @@ echo '########################################################'
 view_config
 }
 
+set_unbound_org() {
+mkdir -p /etc/unbound/unbound.conf.d >> install.log
+curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache  >> install.log
+curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&showintro=0&mimetype=plaintext" > /etc/unbound/unbound.conf.d/unbound_ad_servers
+
+cat << EOF > /etc/hosts
+127.0.0.1 localhost
+127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+
+::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+EOF
+
+uci set unbound.ub_main=unbound
+uci set unbound.ub_main.add_extra_dns='0'
+uci set unbound.ub_main.add_local_fqdn='1'
+uci set unbound.ub_main.add_wan_fqdn='0'
+uci set unbound.ub_main.dhcp_link='none'
+uci set unbound.ub_main.dhcp4_slaac6='0'
+uci set unbound.ub_main.dns64='0'
+uci set unbound.ub_main.dns64_prefix='64:ff9b::/96'
+uci set unbound.ub_main.domain='lan'
+uci set unbound.ub_main.domain_type='static'
+uci set unbound.ub_main.edns_size='1232'
+uci set unbound.ub_main.extended_stats='0'
+uci set unbound.ub_main.hide_binddata='1'
+uci set unbound.ub_main.interface_auto='1'
+uci set unbound.ub_main.listen_port=$DNS_UNBOUND_port
+uci set unbound.ub_main.localservice='1'
+uci set unbound.ub_main.manual_conf='0'
+uci set unbound.ub_main.num_threads='1'
+uci set unbound.ub_main.protocol='default'
+uci set unbound.ub_main.query_minimize='0'
+uci set unbound.ub_main.query_min_strict='0'
+uci set unbound.ub_main.rate_limit='0'
+uci set unbound.ub_main.rebind_localhost='0'
+uci set unbound.ub_main.rebind_protection='1'
+uci set unbound.ub_main.recursion='default'
+uci set unbound.ub_main.resource='default'
+uci set unbound.ub_main.root_age='9'
+uci set unbound.ub_main.ttl_min='120'
+uci set unbound.ub_main.ttl_neg_max='1000'
+uci set unbound.ub_main.unbound_control='0'
+uci set unbound.ub_main.validator='0'
+uci set unbound.ub_main.validator_ntp='1'
+uci set unbound.ub_main.verbosity='1'
+uci delete unbound.ub_main.iface_trig
+uci add_list unbound.ub_main.iface_trig='lan' 
+uci add_list unbound.db_main.iface_trig='wan'
+uci set unbound.ub_main.iface_wan='wan'
+uci set unbound.auth_icann=zone
+uci set unbound.auth_icann.enabled='0'
+uci set unbound.auth_icann.fallback='1'
+uci set unbound.auth_icann.url_dir='https://www.internic.net/domain/'
+uci set unbound.auth_icann.zone_type='auth_zone'
+uci delete unbound.auth_icann.server
+uci add_list unbound.auth_icann.server='lax.xfr.dns.icann.org'
+uci add_list unbound.auth_icann.serve='iad.xfr.dns.icann.org'
+uci delete unbound.auth_icann.zone_name
+uci add_list unbound.auth_icann.zone_name='.'
+uci add_list unbound.auth_icann.zone_name='arpa.'
+uci add_list unbound.auth_icann.zone_name='in-addr.arpa.'
+uci add_list unbound.auth_icann.zone_name='ip6.arpa.'
+uci set unbound.fwd_isp=zone
+uci set unbound.fwd_isp.enabled='0'
+uci set unbound.fwd_isp.fallback='1'
+uci set unbound.fwd_isp.resolv_conf='1'
+uci set unbound.fwd_isp.zone_type='forward_zone'
+uci delete unbound.fwd_isp.zone_name
+uci add_list unbound.fwd_isp.zone_name='isp-bill.example.com.'
+uci add_list unbound.fwd_isp.zone_name='isp-mail.example.net.'
+uci set unbound.fwd_google=zone
+uci set unbound.fwd_google.enabled='0'
+uci set unbound.fwd_google.fallback='1'
+uci set unbound.fwd_google.tls_index='dns.google'
+uci set unbound.fwd_google.tls_upstream='1'
+uci set unbound.fwd_google.zone_type='forward_zone'
+uci delete unbound.fwd_google.server
+uci add_list unbound.fwd_google.server='8.8.4.4'
+uci add_list unbound.fwd_google.server='8.8.8.8'
+uci add_list unbound.fwd_google.server='2001:4860:4860::8844'
+uci add_list unbound.fwd_google.server='2001:4860:4860::8888'
+uci set unbound.fwd_google.zone_name='.'
+uci set unbound.fwd_cloudflare=zone
+uci set unbound.fwd_cloudflare.enabled='0'
+uci set unbound.fwd_cloudflare.fallback='1'
+uci set unbound.fwd_cloudflare.tls_index='cloudflare-dns.com'
+uci set unbound.fwd_cloudflare.tls_upstream='1'
+uci set unbound.fwd_cloudflare.zone_type='forward_zone'
+uci delete unbound.fwd_cloudflare.server
+uci add_list unbound.fwd_cloudflare.server='1.1.1.1'
+uci add_list unbound.fwd_cloudflare.server='1.0.0.1'
+uci add_list unbound.fwd_cloudflare.server='2606:4700:4700::1111'
+uci add_list unbound.fwd_cloudflare.server='2606:4700:4700::1001'
+uci set unbound.fwd_cloudflare.zone_name='.'
+uci set unbound.fwd_stubby=zone
+uci set unbound.fwd_stubby.enabled='1'
+uci set unbound.fwd_stubby.fallback='1'
+uci set unbound.fwd_stubby.tls_index='cloudflare-dns.com'
+uci set unbound.fwd_stubby.tls_upstream='1'
+uci set unbound.fwd_stubby.zone_type='forward_zone'
+uci delete unbound.fwd_stubby.server
+uci add_list unbound.fwd_stubby.server='127.0.0.1 @'$DNS_STUBBY_port 
+uci add_list unbound.fwd_stubby.server='::1 @'$DNS_STUBBY_port
+uci set unbound.fwd_stubby.zone_name='.'
+
+
+
+processes=$(uci commit && reload_config)
+wait $processes  >> install.log
+/etc/init.d/unbound start  >> install.log
+
+echo
+echo 'On Error enter logread'
+echo
+
+clear
+echo
+echo '########################################################'
+echo '#                                                      #'
+echo '#                 CyberSecurity-Box                    #'
+echo '#                                                      #'
+echo '# local Privacy for Voice-Assistent Smart-TV SmartHome #'
+echo '#                                                      #'
+echo '#   Unbound lokal DNS-Resolver with lokal root-files   #'
+echo '#                                                      #'
+echo '########################################################'
+view_config
+
+/etc/init.d/unbound restart  >> install.log
+
+
+#---------------------------------------------------------------------------------------------------------------------------------------------
+clear
+echo
+echo '########################################################'
+echo '#                                                      #'
+echo '#                 CyberSecurity-Box                    #'
+echo '#                                                      #'
+echo '# local Privacy for Voice-Assistent Smart-TV SmartHome #'
+echo '#                                                      #'
+echo '#                AD- and Porn-Filter installed         #'
+echo '#                                                      #'
+echo '########################################################'
+view_config
+}
+
+
 create_dnsmasq_url_filter() {
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -5488,11 +6072,11 @@ wait $processes >> install.log
 # Configure Black and Whitelsit
 cat << EOF > /etc/dnsmasq.d/Blacklist/z_all_allow
 server=/dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion/127.0.0.1
-server=/#/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/#/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 EOF
 
 cat << EOF > /etc/dnsmasq.d/AllowAll/all_allow
-server=/#/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/#/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 EOF
 
 cat << EOF > /etc/dnsmasq.d/BlockAll/block_all
@@ -10092,472 +10676,472 @@ EOF
 cat << EOF > /etc/dnsmasq.d/Blacklist/white
 server=/dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion/127.0.0.1#9053
 
-server=/microsoftconnecttest.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/msftncsi.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/clients3.google.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/connectivitycheck.gstatic.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/detectportal.firefox.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tplinkcloud.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/captive.apple.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/microsoftconnecttest.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/msftncsi.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/clients3.google.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/connectivitycheck.gstatic.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/detectportal.firefox.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tplinkcloud.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/captive.apple.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/3sat.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/7tv.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/7tv.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/accuweather.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/accuweather.comde/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/aio-control.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/aio-control.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/aio-controls.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/aio-controls.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/akamaihd.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/alexasounds.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/alice.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/alice.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/alice-dsl.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/alice-dsl.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazon.co.uk/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazon.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazonsilk.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazon.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazon.eu/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazonaws.co.uk/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/.amazon/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/mlis.amazon.eu/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/spectrum.s3.amazonaws.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazonaws.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazonaws.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/a2z.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/images-amazon.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/andreas-stawinski.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/android.clients.google.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/antenne.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/api.amazonalexa.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/api.co.uk.amazonalexa.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/api.crittercism.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/api.eu.amazonalexa.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/amazonvideo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/api-global.netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/openwrt.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/raspbery.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/3sat.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/7tv.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/7tv.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/accuweather.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/accuweather.comde/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/aio-control.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/aio-control.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/aio-controls.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/aio-controls.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/akamaihd.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/alexasounds.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/alice.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/alice.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/alice-dsl.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/alice-dsl.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazon.co.uk/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazon.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazonsilk.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazon.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazon.eu/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazonaws.co.uk/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/.amazon/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/mlis.amazon.eu/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/spectrum.s3.amazonaws.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazonaws.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazonaws.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/a2z.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/images-amazon.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/andreas-stawinski.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/android.clients.google.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/antenne.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/api.amazonalexa.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/api.co.uk.amazonalexa.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/api.crittercism.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/api.eu.amazonalexa.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/amazonvideo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/api-global.netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/openwrt.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/raspbery.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
 
-server=/apple.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/mzstatic.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/apple.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/apple.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/mzstatic.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/apple.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/ard.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ardmediathek.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/arte.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/avm.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bing.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/br.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/br24.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/br-24.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/br24.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/br-24.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cddbp.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/chip.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/chip.smarttv.cellular.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cinepass.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cinepass.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cloud.mediola.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cloudfront.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cloudflare-dns.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cloudflare.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/connectors.yonomi.co/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/connectors.yonomi.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/content.dhg.myharmony.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ct.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cyberandi.blog/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cyberandi.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cyberandi.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cyberandi.eu/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/daserste.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/deutschewelle.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/deutschewelle.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/directions.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/directions.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/dnssec-or-not.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/dnssec.vs.uni-due.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/dw.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/dw.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/elasticbeanstalk.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/elasticbeanstalk.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/epg.corio.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/erf.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/erf1.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/erste.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/filmstarts.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/focus.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/fireoscaptiveportal.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/freestream.nmdn.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/fritz.box/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/flip.it/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ftp.stawimedia.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/github.io/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/github.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/github.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/galileo.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/gallileo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/geonames.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/getinvoked.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ggpht.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/googleapis.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/google.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/googlevideo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/gracenote.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/gvt1.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/harmonyremote.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/harmony-remote.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/harmonyremote.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/harmony-remote.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hbbtv.*/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/heise.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/heise-online.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/heute.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hinter.bibeltv.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/home.stawimedia.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hotmail.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hotmail.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ichnaea.netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/icloud.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/icloud.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ifttt.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ihealthlabs.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/imdb.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/imdb.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/invokedapps.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/invokedapps.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ipleak.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ipv4_*.*.*.fra*.ix.nflxvideo.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ipv6_*.*.*.fra*.ix.nflxvideo.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ism/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/it-business.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/it-business.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/itunes.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ix.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ix.nflxvideo.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ix.nflxvideo.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/ard.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ardmediathek.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/arte.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/avm.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bing.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/br.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/br24.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/br-24.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/br24.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/br-24.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cddbp.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/chip.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/chip.smarttv.cellular.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cinepass.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cinepass.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cloud.mediola.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cloudfront.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cloudflare-dns.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cloudflare.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/connectors.yonomi.co/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/connectors.yonomi.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/content.dhg.myharmony.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ct.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cyberandi.blog/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cyberandi.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cyberandi.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cyberandi.eu/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/daserste.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/deutschewelle.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/deutschewelle.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/directions.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/directions.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/dnssec-or-not.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/dnssec.vs.uni-due.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/dw.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/dw.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/elasticbeanstalk.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/elasticbeanstalk.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/epg.corio.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/erf.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/erf1.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/erste.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/filmstarts.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/focus.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/fireoscaptiveportal.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/freestream.nmdn.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/fritz.box/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/flip.it/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ftp.stawimedia.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/github.io/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/github.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/github.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/galileo.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/gallileo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/geonames.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/getinvoked.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ggpht.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/googleapis.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/google.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/googlevideo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/gracenote.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/gvt1.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/harmonyremote.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/harmony-remote.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/harmonyremote.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/harmony-remote.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hbbtv.*/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/heise.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/heise-online.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/heute.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hinter.bibeltv.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/home.stawimedia.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hotmail.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hotmail.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ichnaea.netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/icloud.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/icloud.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ifttt.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ihealthlabs.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/imdb.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/imdb.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/invokedapps.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/invokedapps.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ipleak.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ipv4_*.*.*.fra*.ix.nflxvideo.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ipv6_*.*.*.fra*.ix.nflxvideo.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ism/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/it-business.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/it-business.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/itunes.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ix.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ix.nflxvideo.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ix.nflxvideo.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/joyn.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/api.segment.io/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/seventv.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/route71.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ak-t1p-vod-playout-prod.akamaized.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/prosieben-ctr.live.ott.irdeto.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/p7s1video.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/joyn.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/joyn.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/joyn.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/kabeleins.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/joyn.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/api.segment.io/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/seventv.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/route71.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ak-t1p-vod-playout-prod.akamaized.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/prosieben-ctr.live.ott.irdeto.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/p7s1video.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/joyn.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/joyn.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/joyn.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/kabeleins.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/laut.fm/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/live.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/live.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/llnwd.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/llnwd.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/logging.dhg.myharmony.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/m.media-amazon.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/m.tvinfo.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/macandi.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/mediola.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/mediola.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/members.harmonyremote.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/metafilegenerator.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/microsoft.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/microsoft.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/mobile.chip.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/myfritz.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/myharmony.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/myharmony.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/myharmony.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/myremotesetup.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/mytvscout.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/n24.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/push.prod.netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nccp.netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/uiboot.netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/secure.netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/customerevents.netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/netflix.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/netflix.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflximg.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflximg.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflxvideo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflxvideo.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflxvideo.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflxso.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nfximg.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflxso.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nfximg.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nflxso.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nfximg.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nodejs.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/no-ip.biz/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nokia.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/nokia.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/npmjs.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ntp.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/n-tv.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/o2.box/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/office.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/office.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/office365.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/office365.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/onlinewetter.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/onlinewetter.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/opendns.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/openstreetmap.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/openstreetmap.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/openstreetmap.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/outlook.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/outlook.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/outlook.live.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pcwelt.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pc-welt.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/philips.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/philips.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/philips.nl/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/phobos.apple.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/phobos.apple.com.edgesuite.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/photos.apple.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/photos.apple.com.edgesuite.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pionieer.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/play.google.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/playstation.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/prosieben.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ps3.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pubsub.pubnub.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pubnub.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/radio.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/radiogong.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/radiotime.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/remotes.aio-control.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/remotes.aio-control.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/remotes.aio-controls.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/remotes.aio-controls.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/remotesneo.aio-control.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/resolver1.opendns.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/resolver2.opendns.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/resolver3.opendns.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/resolver4.opendns.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/rtl.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/rtl2.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/s3-directional-w.amazonaws.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/samsung.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/sat1.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/script.ioam.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/shoutcast.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/sony.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/spn.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/startpage.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/startpage.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/startpage.nl/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/stawimedia.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/stawimedia.eu/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/stawimedia.local/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/stream.erf.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/streamfarm.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/swisscows.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/swisscows.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/sus.dhg.myharmony.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/svcs.myharmony.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/t3n.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/telegram.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/t.me/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tagesschau.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tagesschau24.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/time.nist.gov/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/time.windows.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/torproject.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tumblr.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tumblr.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tumblr.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tune_in.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tune_in.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tunein.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tune-in.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tunein.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tune-in.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tvnow.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tvnow.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/twitter.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/twitter.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/t.co/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tvtv.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/unifiedlayer.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/vevo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/vevo.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/video.google.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/videobuster.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/videobuster.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/videociety.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/videociety.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/vimeo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/vimeo.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wbsapi.withings.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/waipu.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/waipu.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/waipu.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/whatismyip.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wpstr.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/waipu.ch/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/weather.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/weather.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/welt.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wetter.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wetter.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wetteronline.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wetter-online.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wikimedia.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wikipedia.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wikipedia.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wikipedia.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/withings.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/withings.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ws.withings.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wunderlist.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/y2u.be/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/yelp.co.uk/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/yelp.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/yelp.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/yelp.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/yelpcdn.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/yonomi.co/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/yonomi.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/youtu.be/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/youtube.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/youtube-nocookie.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ytimg.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/laut.fm/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/live.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/live.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/llnwd.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/llnwd.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/logging.dhg.myharmony.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/m.media-amazon.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/m.tvinfo.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/macandi.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/mediola.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/mediola.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/members.harmonyremote.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/metafilegenerator.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/microsoft.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/microsoft.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/mobile.chip.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/myfritz.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/myharmony.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/myharmony.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/myharmony.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/myremotesetup.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/mytvscout.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/n24.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/push.prod.netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nccp.netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/uiboot.netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/secure.netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/customerevents.netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/netflix.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/netflix.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflximg.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflximg.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflxvideo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflxvideo.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflxvideo.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflxso.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nfximg.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflxso.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nfximg.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nflxso.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nfximg.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nodejs.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/no-ip.biz/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nokia.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/nokia.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/npmjs.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ntp.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/n-tv.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/o2.box/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/office.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/office.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/office365.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/office365.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/onlinewetter.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/onlinewetter.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/opendns.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/openstreetmap.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/openstreetmap.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/openstreetmap.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/outlook.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/outlook.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/outlook.live.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pcwelt.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pc-welt.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/philips.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/philips.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/philips.nl/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/phobos.apple.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/phobos.apple.com.edgesuite.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/photos.apple.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/photos.apple.com.edgesuite.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pionieer.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/play.google.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/playstation.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/prosieben.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ps3.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pubsub.pubnub.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pubnub.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/radio.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/radiogong.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/radiotime.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/remotes.aio-control.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/remotes.aio-control.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/remotes.aio-controls.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/remotes.aio-controls.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/remotesneo.aio-control.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/resolver1.opendns.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/resolver2.opendns.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/resolver3.opendns.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/resolver4.opendns.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/rtl.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/rtl2.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/s3-directional-w.amazonaws.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/samsung.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/sat1.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/script.ioam.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/shoutcast.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/sony.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/spn.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/startpage.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/startpage.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/startpage.nl/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/stawimedia.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/stawimedia.eu/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/stawimedia.local/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/stream.erf.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/streamfarm.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/swisscows.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/swisscows.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/sus.dhg.myharmony.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/svcs.myharmony.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/t3n.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/telegram.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/t.me/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tagesschau.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tagesschau24.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/time.nist.gov/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/time.windows.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/torproject.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tumblr.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tumblr.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tumblr.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tune_in.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tune_in.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tunein.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tune-in.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tunein.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tune-in.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tvnow.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tvnow.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/twitter.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/twitter.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/t.co/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tvtv.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/unifiedlayer.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/vevo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/vevo.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/video.google.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/videobuster.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/videobuster.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/videociety.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/videociety.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/vimeo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/vimeo.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wbsapi.withings.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/waipu.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/waipu.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/waipu.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/whatismyip.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wpstr.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/waipu.ch/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/weather.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/weather.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/welt.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wetter.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wetter.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wetteronline.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wetter-online.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wikimedia.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wikipedia.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wikipedia.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wikipedia.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/withings.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/withings.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ws.withings.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wunderlist.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/y2u.be/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/yelp.co.uk/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/yelp.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/yelp.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/yelp.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/yelpcdn.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/yonomi.co/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/yonomi.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/youtu.be/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/youtube.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/youtube-nocookie.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ytimg.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/zattoo.ch/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/zattoo.co.uk/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/zattoo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/zattoo.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/zattic.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/zahs.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/zattoo.eu/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/zattoo.ch/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/zattoo.co.uk/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/zattoo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/zattoo.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/zattic.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/zahs.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/zattoo.eu/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/zdf.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/zdf-cdn.live.cellular.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/zdf.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/zdf-cdn.live.cellular.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/dlive.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/dlive.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/dlive.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/dlive.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/twitch.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/twitch.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/twitch.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/twitchcdn.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ttvnw.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/jtvnw.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/twitch.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/twitch.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/twitch.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/twitch.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/twitchcdn.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ttvnw.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/jtvnw.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/twitch.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/disneyplus.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disney+.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disneyplus.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disney+.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disneyplus.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bamgrid.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bam.nr-data.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cdn.registerdisney.go.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/cws.convia.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/d9.flashtalking.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disney-portal.my.onetrust.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disneyplus.bn5x.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/js-agent.newrelic.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disney-plus.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/dssott.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/adobedtm.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/disney+.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/disneyplus.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disney+.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disneyplus.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disney+.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disneyplus.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bamgrid.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bam.nr-data.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cdn.registerdisney.go.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/cws.convia.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/d9.flashtalking.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disney-portal.my.onetrust.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disneyplus.bn5x.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/js-agent.newrelic.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disney-plus.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/dssott.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/adobedtm.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/disney+.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/pluto.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pluto.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pluto.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tvnow.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tvnow.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tvnow.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/duckduck.go/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/duckduckgo.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/duckduckgo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/pluto.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pluto.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pluto.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tvnow.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tvnow.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tvnow.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/duckduck.go/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/duckduckgo.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/duckduckgo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/fireoscaptiveportal.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/fireoscaptiveportal.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/bitchute.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bitchute.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/instagram.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/instagram.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pinterest.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pinterest.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/pinterest.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/flickr.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/flickr.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/flickr.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/imdb.tv/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/imdb.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/imdb.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/imdb.org/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/you2.be/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/youtu.be/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/spotify.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/spotify.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/spotify.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/www.bit.ly/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bit.ly/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/ow.ly/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/tinyurl.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/buff.ly/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/trib.al/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/serienstream.sx/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/goo.gl/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/duckduckgo.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/duckduck.go/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wetter-online.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/wetter-online.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/snapcraft.io/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/easylist.to/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/secure.fanboy.co.nz/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/glm.io/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/heise.cloudimg.io/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/im.bestcheck.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/eum.instana.io/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/s.w-x.co/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/docker.io/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bibelserver.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bibelserver.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bibleserver.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/bibleserver.com/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/erf.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/icf.ch/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/icf.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/icf.church/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/bitchute.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bitchute.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/instagram.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/instagram.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pinterest.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pinterest.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/pinterest.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/flickr.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/flickr.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/flickr.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/imdb.tv/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/imdb.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/imdb.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/imdb.org/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/you2.be/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/youtu.be/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/spotify.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/spotify.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/spotify.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/www.bit.ly/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bit.ly/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/ow.ly/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/tinyurl.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/buff.ly/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/trib.al/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/serienstream.sx/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/goo.gl/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/duckduckgo.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/duckduck.go/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wetter-online.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/wetter-online.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/snapcraft.io/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/easylist.to/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/secure.fanboy.co.nz/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/glm.io/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/heise.cloudimg.io/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/im.bestcheck.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/eum.instana.io/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/s.w-x.co/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/docker.io/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bibelserver.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bibelserver.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bibleserver.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/bibleserver.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/erf.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/icf.ch/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/icf.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/icf.church/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
-server=/.skype/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/.youtube/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/.office/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/.skype/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/.youtube/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/.office/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 server=/.exit/127.0.0.1#9053
 server=/.onion/127.0.0.1#9053
 EOF
 
 cat << EOF > /etc/dnsmasq.d/Blacklist/banking
 
-server=/.banking/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/unicredit.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hvb.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/unicredit.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hvb.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hypovereinsbak.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/hypovereinsbank.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/comdirekt.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/comdirect.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/comdirect.net/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/postbank.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/satander.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/n26.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/deutschebank.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/reiba.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/sparkasse.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/sskm.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
-server=/commerzbank.de/127.0.0.1#$(echo $DNSMASQ_Relay_port)
+server=/.banking/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/unicredit.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hvb.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/unicredit.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hvb.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hypovereinsbak.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/hypovereinsbank.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/comdirekt.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/comdirect.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/comdirect.net/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/postbank.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/satander.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/n26.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/deutschebank.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/reiba.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/sparkasse.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/sskm.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/commerzbank.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 
 EOF
 
@@ -10574,6 +11158,7 @@ cp /etc/dnsmasq.d/Blacklist/white /etc/dnsmasq.d/Whitelist/white >> install.log
 echo
 echo
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -10588,6 +11173,7 @@ view_config
 
 create_unbound_url_filter() {
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -10601,8 +11187,6 @@ view_config
 
 /etc/init.d/unbound stop  >> install.log
 /etc/init.d/log restart  >> install.log
-
-#Configure stubby
 
 cat << EOF > /etc/unbound/unbound_srv.conf
 ##############################################################################
@@ -20806,6 +21390,7 @@ echo 'On Error enter logread'
 echo
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -20818,10 +21403,17 @@ echo '########################################################'
 view_config
 }
 
-
 set_dhcp() {
 if [ "$dnsmasq_inst" != "" ]
 	then
+		set_dhcp_sub
+fi
+}
+
+set_dhcp_sub() {
+		echo 'delete dhcp.@dnsmasq[-1]'
+		echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) 'delete dhcp.@dnsmasq[-1]'>> install.log
+		echo
   		uci delete dhcp.@dnsmasq[-1] >/dev/null
     		processes=$(uci commit && reload_config)
 		wait $processes >/dev/null
@@ -20846,50 +21438,67 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.Blacklist.leasefile='/tmp/dhcp.leases'
 		uci set dhcp.Blacklist.resolvfile='/tmp/resolv.conf.d/resolv.conf.auto'
 		uci set dhcp.Blacklist.confdir='/etc/dnsmasq.d/Blacklist/'
-		uci add_list dhcp.Blacklist.notinterface='br-lan.105'
-		uci add_list dhcp.Blacklist.notinterface='br-lan.106'
-		uci add_list dhcp.Blacklist.notinterface='br-lan.107'
-		uci add_list dhcp.Blacklist.notinterface='br-lan.108'
-		uci add_list dhcp.Blacklist.notinterface='br-lan.110'
-		uci add_list dhcp.Blacklist.notinterface='loopback'
+		if [ "$main_release" != "23" ] 
+			then
+				uci add_list dhcp.Blacklist.notinterface='br-lan.105'
+				uci add_list dhcp.Blacklist.notinterface='br-lan.106'
+				uci add_list dhcp.Blacklist.notinterface='br-lan.107'
+				uci add_list dhcp.Blacklist.notinterface='br-lan.108'
+				uci add_list dhcp.Blacklist.notinterface='br-lan.110'
+				uci add_list dhcp.Blacklist.notinterface='loopback'
+			else
+				uci add_list dhcp.Blacklist.interface='br-lan.105'
+				uci add_list dhcp.Blacklist.interface='br-lan.106'
+				uci add_list dhcp.Blacklist.interface='br-lan.107'
+				uci add_list dhcp.Blacklist.interface='br-lan.108'
+				uci add_list dhcp.Blacklist.interface='br-lan.110'
+				uci add_list dhcp.Blacklist.interface='loopback'
+		fi
 		uci add_list dhcp.Blacklist.interface='br-lan.104'
 		uci add_list dhcp.Blacklist.interface='br-lan.101' 
 		uci add_list dhcp.Blacklist.interface='br-lan.102'
 		uci add_list dhcp.Blacklist.interface='br-lan.103'
 		uci add_list dhcp.Blacklist.interface='br-lan.1'
+		uci set dhcp:Blacklist.filter_a='0'
+		uci set dhcp:Blacklist.filter_aaaa='1'
 
-		uci set dhcp.Whitelist=dnsmasq
-		uci set dhcp.Whitelist.domainneeded='1'
-		uci set dhcp.Whitelist.boguspriv='1'
-		uci set dhcp.Whitelist.filterwin2k='0'
-		uci set dhcp.Whitelist.localise_queries='1'
-		uci set dhcp.Whitelist.rebind_protection='1'
-		uci set dhcp.Whitelist.rebind_localhost='1'
-		uci set dhcp.Whitelist.expandhosts='1'
-		uci set dhcp.Whitelist.nonegcache='0'
-		uci set dhcp.Whitelist.authoritative='1'
-		uci set dhcp.Whitelist.readethers='1'
-		uci set dhcp.Whitelist.nonwildcard='1'
-		uci set dhcp.Whitelist.localservice='1'
-		uci set dhcp.Whitelist.ednspacket_max='1232'
-		uci set dhcp.Whitelist.cachelocal='1'
-		uci set dhcp.Whitelist.cachesize='0'
-		uci set dhcp.Whitelist.queryport=$DNSMASQ_Relay_port
-		uci set dhcp.Whitelist.leasefile='/tmp/dhcp.leases'
-		uci set dhcp.Whitelist.resolvfile='/tmp/resolv.conf.d/resolv.conf.auto'
-		uci set dhcp.Whitelist.confdir='/etc/dnsmasq.d/Whitelist/'
-		uci add_list dhcp.Whitelist.interface='br-lan.105'
-		uci add_list dhcp.Whitelist.interface='br-lan.106'
-		uci add_list dhcp.Whitelist.interface='br-lan.107'
-		uci add_list dhcp.Whitelist.interface='br-lan.108'
-		uci add_list dhcp.Whitelist.interface='br-lan.110'
-		uci add_list dhcp.Whitelist.interface='loopback'
-		uci add_list dhcp.Whitelist.notinterface='br-lan.104'
-		uci add_list dhcp.Whitelist.notinterface='br-lan.101'
-		uci add_list dhcp.Whitelist.notinterface='br-lan.102'
-		uci add_list dhcp.Whitelist.notinterface='br-lan.103'
-		uci add_list dhcp.Whitelist.notinterface='br-lan.1'
+		if [ "$main_release" != "23" ] 
+			then
 
+				uci set dhcp.Whitelist=dnsmasq
+				uci set dhcp.Whitelist.domainneeded='1'
+				uci set dhcp.Whitelist.boguspriv='1'
+				uci set dhcp.Whitelist.filterwin2k='0'
+				uci set dhcp.Whitelist.localise_queries='1'
+				uci set dhcp.Whitelist.rebind_protection='1'
+				uci set dhcp.Whitelist.rebind_localhost='1'
+				uci set dhcp.Whitelist.expandhosts='1'
+				uci set dhcp.Whitelist.nonegcache='0'
+				uci set dhcp.Whitelist.authoritative='1'
+				uci set dhcp.Whitelist.readethers='1'
+				uci set dhcp.Whitelist.nonwildcard='1'
+				uci set dhcp.Whitelist.localservice='1'
+				uci set dhcp.Whitelist.ednspacket_max='1232'
+				uci set dhcp.Whitelist.cachelocal='1'
+				uci set dhcp.Whitelist.cachesize='0'
+				uci set dhcp.Whitelist.queryport=$DNSMASQ_Relay_port
+				uci set dhcp.Whitelist.leasefile='/tmp/dhcp.leases'
+				uci set dhcp.Whitelist.resolvfile='/tmp/resolv.conf.d/resolv.conf.auto'
+				uci set dhcp.Whitelist.confdir='/etc/dnsmasq.d/Whitelist/'
+				uci add_list dhcp.Whitelist.interface='br-lan.105'
+				uci add_list dhcp.Whitelist.interface='br-lan.106'
+				uci add_list dhcp.Whitelist.interface='br-lan.107'
+				uci add_list dhcp.Whitelist.interface='br-lan.108'
+				uci add_list dhcp.Whitelist.interface='br-lan.110'
+				uci add_list dhcp.Whitelist.interface='loopback'
+				uci add_list dhcp.Whitelist.notinterface='br-lan.104'
+				uci add_list dhcp.Whitelist.notinterface='br-lan.101'
+				uci add_list dhcp.Whitelist.notinterface='br-lan.102'
+				uci add_list dhcp.Whitelist.notinterface='br-lan.103'
+				uci add_list dhcp.Whitelist.notinterface='br-lan.1'
+				uci set dhcp:Whitelist.filter_a='0'
+				uci set dhcp:Whitelist.filter_aaaa='1'
+		fi
 		uci set dhcp.CMOVIE=dhcp
 		uci set dhcp.CMOVIE.interface='CMOVIE'
 		uci set dhcp.CMOVIE.start='20'
@@ -20898,13 +21507,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.CMOVIE.netmask='255.255.255.0'
 		uci set dhcp.CMOVIE.domain=$CMOVIE_domain
 		uci set dhcp.CMOVIE.local='/'$CMOVIE_domain'/'
-		uci set dhcp.CMOVIE.instance='Whitelist'
+		#uci set dhcp.CMOVIE.instance='Whitelist'
+		uci set dhcp.CMOVIE.dhcpv4='server'
+		uci set dhcp.CMOVIE.dhcpv6='server'
 		#uci add_list dhcp.CMOVIE.dhcp_option='6,'$CMOVIE_ip 
 		uci add_list dhcp.CMOVIE.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.CMOVIE.dhcp_option='3,'$CMOVIE_ip
 		uci add_list dhcp.CMOVIE.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.CMOVIE.dhcp_option='15,'$CMOVIE_domain
-		uci set dhcp.CMOVIE.server=$CMOVIE_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.CMOVIE.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.CMOVIE.server=$CMOVIE_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci set dhcp.CONTROL=dhcp
 		uci set dhcp.CONTROL.interface='CONTROL'
@@ -20914,13 +21530,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.CONTROL.netmask='255.255.255.0'	
 		uci set dhcp.CONTROL.domain=$CONTROL_domain
 		uci set dhcp.CONTROL.local='/'$CONTROL_domain'/'
-		uci set dhcp.CONTROL.instance='Blacklist'
+		#uci set dhcp.CONTROL.instance='Blacklist'
+		uci set dhcp.CONTROL.dhcpv4='server'
+		uci set dhcp.CONTROL.dhcpv6='server'
 		#uci add_list dhcp.CONTROL.dhcp_option='6,'$CONTROL_ip 
 		uci add_list dhcp.CONTROL.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.CONTROL.dhcp_option='3,'$CONTROL_ip
 		uci add_list dhcp.CONTROL.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.CONTROL.dhcp_option='15,'$CONTROL_domain
-		uci set dhcp.CONTROL.server=$CONTROL_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.CONTROL.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.CONTROL.server=$CONTROL_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci set dhcp.ENTERTAIN=dhcp
 		uci set dhcp.ENTERTAIN.interface='ENTERTAIN'
@@ -20930,13 +21553,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.ENTERTAIN.netmask='255.255.255.0'
 		uci set dhcp.ENTERTAIN.domain=$ENTERTAIN_domain
 		uci set dhcp.ENTERTAIN.local='/'$ENTERTAIN_domain'/'
-		uci set dhcp.ENTERTAIN.instance='Whitelist'
+		#uci set dhcp.ENTERTAIN.instance='Whitelist'
+		uci set dhcp.ENTERTAIN.dhcpv4='server'
+		uci set dhcp.ENTERTAIN.dhcpv6='server'
 		#uci add_list dhcp.ENTERTAIN.dhcp_option='6,'$ENTERTAIN_ip 
 		uci add_list dhcp.ENTERTAIN.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.ENTERTAIN.dhcp_option='3,'$ENTERTAIN_ip
 		uci add_list dhcp.ENTERTAIN.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.ENTERTAIN.dhcp_option='15,'$ENTERTAIN_domain
-		uci set dhcp.ENTERTAIN.server=$ENTERTAIN_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.ENTERTAIN.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.ENTERTAIN.server=$ENTERTAIN_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci set dhcp.GUEST=dhcp
 		uci set dhcp.GUEST.interface='GUEST'
@@ -20946,13 +21576,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.GUEST.netmask='255.255.255.0'
 		uci set dhcp.GUEST.domain=$GUEST_domain
 		uci set dhcp.GUEST.local='/'$GUEST_domain'/'
-		uci set dhcp.GUEST.instance='Whitelist'
+		#uci set dhcp.GUEST.instance='Whitelist'
+		uci set dhcp.GUEST.dhcpv4='server'
+		uci set dhcp.GUEST.dhcpv6='server'
 		#uci add_list dhcp.GUEST.dhcp_option='6,'$GUEST_ip 
 		uci add_list dhcp.GUEST.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.GUEST.dhcp_option='3,'$GUEST_ip
 		uci add_list dhcp.GUEST.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.GUEST.dhcp_option='15,'$GUEST_domain
-		uci set dhcp.GUEST.server=$GUEST_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.GUEST.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.GUEST.server=$GUEST_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci set dhcp.HCONTROL=dhcp
 		uci set dhcp.HCONTROL.interface='HCONTROL'
@@ -20962,13 +21599,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.HCONTROL.netmask='255.255.255.0'
 		uci set dhcp.HCONTROL.domain=$HCONTROL_domain
 		uci set dhcp.HCONTROL.local='/'$HCONTROL_domain'/'
-		uci set dhcp.HCONTROL.instance='Blacklist'
+		#uci set dhcp.HCONTROL.instance='Blacklist'
+		uci set dhcp.HCONTROL.dhcpv4='server'
+		uci set dhcp.HCONTROL.dhcpv6='server'
 		#uci add_list dhcp.HCONTROL.dhcp_option='6,'$HCONTROL_ip 
 		uci add_list dhcp.HCONTROL.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.HCONTROL.dhcp_option='3,'$HCONTROL_ip
 		uci add_list dhcp.HCONTROL.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.HCONTROL.dhcp_option='15,'$HCONTROL_domain
-		uci set dhcp.HCONTROL.server=$HCONTROL_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.HCONTROL.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.HCONTROL.server=$HCONTROL_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci set dhcp.INET=dhcp
 		uci set dhcp.INET.interface='INET'
@@ -20978,13 +21622,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.INET.netmask='255.255.255.0'
 		uci set dhcp.INET.domain=$INET_domain
 		uci set dhcp.INET.local='/'$INET_domain'/'
-		uci set dhcp.INET.instance='Blacklist'
+		#uci set dhcp.INET.instance='Blacklist'
+		uci set dhcp.INET.dhcpv4='server'
+		uci set dhcp.INET.dhcpv6='server'
 		#uci add_list dhcp.INET.dhcp_option='6,'$INET_ip 
 		uci add_list dhcp.INET.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.INET.dhcp_option='3,'$INET_ip
 		uci add_list dhcp.INET.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.INET.dhcp_option='15,'$INET_domain
-		uci set dhcp.INET.server=$INET_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.INET.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.INET.server=$INET_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci del dhcp.lan.ra_slaac
 		uci set dhcp.lan.start='10'
@@ -20993,12 +21644,19 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.lan.netmask='255.255.255.0'
 		uci set dhcp.lan.domain='lan.local'
 		uci set dhcp.lan.local='/lan.local/'
-		uci set dhcp.lan.instance='Blacklist'
+		#uci set dhcp.lan.instance='Blacklist'
+		uci set dhcp.lan.dhcpv4='server'
+		uci set dhcp.lan.dhcpv6='server'
 		uci add_list dhcp.lan.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.lan.dhcp_option='3,'$LAN_ip
 		uci add_list dhcp.lan.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.lan.dhcp_option='15,'$LAN_domain
-		uci set dhcp.lan.server=$LAN_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.lan.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.lan.server=$LAN_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci set dhcp.SERVER=dhcp
 		uci set dhcp.SERVER.interface='SERVER'
@@ -21008,13 +21666,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.SERVER.netmask='255.255.255.0'
 		uci set dhcp.SERVER.domain=$SERVER_domain
 		uci set dhcp.SERVER.local='/'$SERVER_domain'/'
-		uci set dhcp.SERVER.instance='Blacklist'
+		#uci set dhcp.SERVER.instance='Blacklist'
+		uci set dhcp.SERVER.dhcpv4='server'
+		uci set dhcp.SERVER.dhcpv6='server'
 		#uci add_list dhcp.SERVER.dhcp_option='6,'$SERVER_ip 
 		uci add_list dhcp.SERVER.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.SERVER.dhcp_option='3,'$SERVER_ip
 		uci add_list dhcp.SERVER.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.SERVER.dhcp_option='15,'$SERVER_domain
-		uci set dhcp.SERVER.server=$SERVER_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.SERVER.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.SERVER.server=$SERVER_ip'#'$DNSMASQ_Relay_port
+		fi
 
 
 		uci set dhcp.TELEKOM=dhcp
@@ -21025,13 +21690,20 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.TELEKOM.netmask='255.255.255.0'
 		uci set dhcp.TELEKOM.domain=$TELEKOM_domain
 		uci set dhcp.TELEKOM.local='/'$TELEKOM_domain'/'
-		uci set dhcp.TELEKOM.instance='Whitelist'
+		#uci set dhcp.TELEKOM.instance='Whitelist'
+		uci set dhcp.TELEKOM.dhcpv4='server'
+		uci set dhcp.TELEKOM.dhcpv6='server'
 		#uci add_list dhcp.TELEKOM.dhcp_option='6,'$TELEKOM_ip 
 		uci add_list dhcp.TELEKOM.dhcp_option='6,'$INET_GW 
 		uci add_list dhcp.TELEKOM.dhcp_option='3,'$TELEKOM_ip
 		uci add_list dhcp.TELEKOM.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.TELEKOM.dhcp_option='15,'$TELEKOM_domain
-		uci set dhcp.TELEKOM.server=$TELEKOM_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.TELEKOM.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.TELEKOM.server=$TELEKOM_ip'#'$DNSMASQ_Relay_port
+		fi
 
 		uci set dhcp.VOICE=dhcp
 		uci set dhcp.VOICE.interface='VOICE'
@@ -21041,15 +21713,21 @@ if [ "$dnsmasq_inst" != "" ]
 		uci set dhcp.VOICE.netmask='255.255.255.0'
 		uci set dhcp.VOICE.domain=$VOICE_domain	
 		uci set dhcp.VOICE.local='/'$VOICE_domain'/'
-		uci set dhcp.VOICE.instance='Whitelist'
+		#uci set dhcp.VOICE.instance='Whitelist'
+		uci set dhcp.VOICE.dhcpv4='server'
+		uci set dhcp.VOICE.dhcpv6='server'
 		#uci add_list dhcp.VOICE.dhcp_option='6,'$VOICE_ip 
 		uci add_list dhcp.VOICE.dhcp_option='6,'$INET_GW 	
 		uci add_list dhcp.VOICE.dhcp_option='3,'$VOICE_ip
 		uci add_list dhcp.VOICE.dhcp_option='42,'$INET_GW 
 		uci add_list dhcp.VOICE.dhcp_option='15,'$VOICE_domain
-		uci set dhcp.VOICE.server=$VOICE_ip'#'$DNSMASQ_Relay_port
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.VOICE.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.VOICE.server=$VOICE_ip'#'$DNSMASQ_Relay_port
+		fi
 
-fi
 mkdir -p /etc/dnsmasq.d  >> install.log
 mkdir -p /etc/dnsmasq.d/Blacklist >> install.log
 mkdir -p /etc/dnsmasq.d/Whitelist >> install.log
@@ -21839,6 +22517,7 @@ clear
 
 set_firewall_rules() {
 # Intercept SSH, HTTP and HTTPS traffic
+
 uci -q delete firewall.ssh_int >/dev/null
 uci set firewall.ssh_int="redirect"
 uci set firewall.ssh_int.name="Intercept_SSH"
@@ -21868,14 +22547,16 @@ wait $processes >/dev/null
 
 # Intercept DNS and TCP traffic
 
-uci -q delete firewall.tcp_onion_int > /dev/null uci set firewall.tcp_onion_int="redirect"
+uci -q delete firewall.tcp_onion_int > /dev/null 
+
+uci set firewall.tcp_onion_int="redirect"
 uci set firewall.tcp_onion_int.name="Intercept_Onion_Domain"
+uci set firewall.tcp_onion_int.src="INET"
 uci set firewall.tcp_onion_int.src_dport=$TOR_TRANS_port
 uci set firewall.tcp_onion_int.dest_port=$TOR_TRANS_port
+uci set firewall.tcp_onion_int.src_dip="10.192.0.0./10"
 uci set firewall.tcp_onion_int.proto="tcp"
 uci set firewall.tcp_onion_int.target="DNAT"
-uci set firewall.tcp_onion_int.src="INET"
-uci set firewall.tcp_onion_int.src_dip="10.192.0.0./10"
 uci set firewall.tcp_onion_int.extra="--syn"
 uci set firewall.tcp_onion_int.enabled='0'
 
@@ -24107,7 +24788,9 @@ uci set firewall.blockIncoming.name="Block_Incoming"
 uci set firewall.blockIncoming.dest="*"
 uci set firewall.blockIncoming.target="REJECT"
 uci set firewall.blockIncoming.enabled="1"
-
+echo
+echo 'Firewall active: ' $SECURE_RULES
+echo
 if [ "$SECURE_RULES" = "" ]
         then
              FW_HSactive='1'
@@ -24158,9 +24841,13 @@ wait $processes
 }
 
 #-------------------------start---------------------------------------
+
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':'%N) ' Starting...'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':'%N) ' Starting...' >> install.log
+echo
 echo >> install.log
 echo $main_release
+echo
 echo >> install.log
 define_variables >> install.log
 echo 'Automation Install'
@@ -24184,35 +24871,59 @@ service log restart
 
 if [ "$TOR_ONION" = "1" ]
                	then
+			echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' set Tor'
 			echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' set Tor' >> install.log
-   			set_tor >> install.log
+   			set_tor 
 fi
-
+echo
+echo >> install.log
 if [ "$STUBBY" = "1" ]
                	then
-			echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' set Stubby' >> install.log
+			echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' set Stubby'
+			echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' set Stubby' >> install.log
 			set_stubby >> install.log
 fi
 
+echo
+echo >> install.log
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' set UNBOUND'
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' set UNBOUND' >> install.log
+
 if [ "$UNBOUND" = "1" ]
                	then
-			echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' set UNBOUND' >> install.log
-			set_unbound >> install.log
+			set_unbound
 fi
 
+uci set unbound.ub_main.listen_port=$DNS_UNBOUND_port
+processes=$(uci commit && reload_config) 
+wait $processes
+processes1=$(/etc/init.d/unbound restart) 
+wait $processes1
+
+echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create UNBOUND URL-Filter' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create UNBOUND URL-Filter' >> install.log
 create_unbound_url_filter >> install.log
+
 echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create DNSMASQ URL-Filter' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' create DNSMASQ URL-Filter' >> install.log
+
+echo
+echo >> install.log
 create_dnsmasq_url_filter >> install.log
 view_config
+
 echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Customize Firmware' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Customize Firmware' >> install.log
 customize_firmware >> install.log
+
 echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Hotspot'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Hotspot' >> install.log
 create_hotspot >> install.log
@@ -24225,30 +24936,43 @@ create_hotspot >> install.log
 ###################################################################################################
 
 echo
-echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create VLAN' 
-echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create VLAN' >> install.log
-create_vlan_bridge >> install.log
+echo >> install.log
+if [ "$VLAN_ENABLE" = "1" ]
+	then
+		echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create VLAN' 
+		echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create VLAN' >> install.log
+		create_vlan_bridge >> install.log
+fi
 
 echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' SetDHCP' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' SetDHCP' >> install.log
 set_dhcp >> install.log
 
 echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Networkinterfaces'
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Networkinterfaces' >> install.log
 create_network_interfaces >> install.log
+
 echo
-echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAM'
-echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAM' >> install.log
+echo >> install.log
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAN'
+echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create WLAN' >> install.log
 create_wlan >> install.log
+
 echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Firewall-Zones' 
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S)' Create Firewall-Zones' >> install.log
 create_firewall_zones >> install.log
+
 ####################################################################################################
 #create_MWAN >> install.log
 ####################################################################################################
+echo >> install.log
+echo
 view_config
 echo
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) ' Set Firewall-Rules'
@@ -24261,26 +24985,66 @@ if [ "$AD_GUARD" = "1" ]
   		echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Set_Mountpoints' 
          	echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Set_Mountpoints' >> install.log
          	set_mountpoints >> install.log
+
+		echo
 	  	echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Install Adguard'
 		echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S':') ' Install Adguard' >> install.log
 		install_adguard >> install.log
 fi
-
+echo
 echo >> install.log
 
+echo
+echo >> install.log
 echo $(date +%d'.'%m'.'%y' '%H':'%M':'%S) >> install.log
+
+echo
 echo >> install.log
-echo 'Tor:	'$(service tor status) >> install.log
+echo 'DNS-Server:' $DNS_IP >> install.log
+
+echo
+echo >> install.log
+echo 'Tor:	' $(service tor status) >> install.log
+echo
 echo $(dig www.test.de -p $DNS_TOR_port @127.0.0.1) >> install.log
+echo
+echo 'crash	:' >> install.log
+echo $(logread | grep 'tor' | grep 'crash') >> install.log
+
+echo
+echo >> install.log
 echo 'Stubby:	' $(service stubby status) >> install.log
+echo
 echo $(dig www.test.de -p $DNS_STUBBY_port @127.0.0.1) >> install.log
+echo
+echo 'crash	:' >> install.log
+echo $(logread | grep 'stubby' | grep 'crash') >> install.log
+
+echo 
+echo >> install.log
 echo 'Unbound:	' $(service unbound status) >> install.log
+echo
 echo $(dig www.test.de -p $DNS_UNBOUND_port @127.0.0.1) >> install.log
+echo
+echo $(logread | grep 'unbound' | grep 'crash') >> install.log
+echo
+echo 'crash	:' >> install.log
+echo $(unbound-checkconf) >> install.log
+
+echo
+echo >> install.log
 echo 'DNSMASQ:	' $(service dnsmasq status) >> install.log
+echo
 echo $(dig www.test.de -p53 @127.0.0.1) >> install.log
 echo
+echo 'crash	:' >> install.log
+echo $(logread | grep 'dnsmasq' | grep 'crash') >> install.log
+
+echo
+echo >> install.log
 
 clear
+echo
 echo '########################################################'
 echo '#                                                      #'
 echo '#                 CyberSecurity-Box                    #'
@@ -24296,23 +25060,44 @@ echo
 echo 'Tor:		' $(service tor status)
 echo $(dig www.test.de -p $DNS_TOR_port @127.0.0.1)
 echo
+echo 'logfile	:'
 echo $(logread | grep 'tor')
+echo
+echo 'crash	:'
+echo $(logread | grep 'tor' | grep 'crash')
 echo
 echo 'Stubby:		' $(service stubby status)
 echo $(dig www.test.de -p $DNS_STUBBY_port @127.0.0.1)
 echo
+echo 'logfile	:'
 echo $(logread | grep 'stubby')
+echo
+echo 'crash	:'
+echo $(logread | grep 'stubby' | grep 'crash')
 echo
 echo 'Unbound:	' $(service unbound status)
 echo $(dig www.test.de -p $DNS_UNBOUND_port @127.0.0.1)
 echo
-echo $(logread | grep 'unbound')
+echo 'logfile	:'  
+echo $(logread | grep 'unbound' )
+echo
+echo 'crash	:'
+echo $(logread | grep 'unbound' | grep 'crash')
 echo
 echo 'DNSMASQ:	' $(service dnsmasq status)
 echo $(dig www.test.de -p53 @127.0.0.1)
+echo
+echo 'logfile	:' 
 echo $(logread | grep 'dnsmasq')
 echo
+echo 'crash	:'
+echo $(logread | grep 'dnsmasq' | grep 'crash')
+echo
+echo 'logfile	:' 
 echo $(logread | grep 'dhcp')
+echo
+echo 'crash	:'
+echo $(logread | grep 'dhcp' | grep 'crash')
 echo
 view_config
 echo
