@@ -103,6 +103,24 @@ if [ ! -z "$1" ]
 fi
 INET_GW_org=$INET_GW
 
+RESET='0'
+
+echo
+read -p 'Would you Reset the Configuration: [y/N] ' -s -n 1 RESET_ANSWER
+echo
+if [ "$RESET_ANSWER" = "y" ]
+	then
+		RESET='1'
+		wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/backup-OpenWrt-2024-08-29.tar.gz
+		sysupgrade -r backup-OpenWrt-2024-08-29.tar.gz
+		## set_unbound_reset
+		## set_tor_reset
+		exit 0
+	else
+		RESET='0'
+fi
+
+
 read -p 'Please give me the WAN-IP (Gateway/Router): ['$INET_GW'] ' INET_GW
 echo
 if [ "$INET_GW" = "" ]
