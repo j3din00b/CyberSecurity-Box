@@ -120,7 +120,7 @@ if [ "$RESET_ANSWER" = "y" ]
 		RESET='0'
 fi
 
-
+echo
 read -p 'Please give me the WAN-IP (Gateway/Router): ['$INET_GW'] ' INET_GW
 echo
 if [ "$INET_GW" = "" ]
