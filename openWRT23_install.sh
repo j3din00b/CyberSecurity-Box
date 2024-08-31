@@ -114,7 +114,10 @@ if [ "$RESET_ANSWER" = "y" ]
 		RESET='1'
 		wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/backup-OpenWrt-2024-08-29.tar.gz
 		sysupgrade -r backup-OpenWrt-2024-08-29.tar.gz
-  		uci commit && reload_config
+  		uci set unbound.ub_main.dhcp_link='dnsmasq'
+    		uci set unbound.ub_main.listen_port='5353'
+  		processes=$(uci commit && reload_config)
+    		wait $processes
 		## set_unbound_reset
 		## set_tor_reset
 		exit 0
@@ -4405,6 +4408,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
@@ -4578,6 +4582,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
@@ -4730,6 +4735,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
@@ -4949,6 +4955,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
@@ -5210,6 +5217,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
@@ -5386,6 +5394,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
@@ -5583,6 +5592,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
@@ -5923,6 +5933,7 @@ curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&sho
 cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3	github.com
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
