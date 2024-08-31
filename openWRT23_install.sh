@@ -63,7 +63,8 @@ echo
 }
 
 ask_parameter() {
-
+rm *.tar.gz
+rm *.log
 release=$(cat /etc/openwrt_release | grep "DISTRIB_RELEASE" | cut -f2 -d '=')
 revision=$(cat /etc/openwrt_release | grep "DISTRIB_REVISION" | cut -f2 -d '=')
 revision=${revision::-1}
@@ -113,6 +114,7 @@ if [ "$RESET_ANSWER" = "y" ]
 		RESET='1'
 		wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/backup-OpenWrt-2024-08-29.tar.gz
 		sysupgrade -r backup-OpenWrt-2024-08-29.tar.gz
+  		uci commit && reload_config
 		## set_unbound_reset
 		## set_tor_reset
 		exit 0
