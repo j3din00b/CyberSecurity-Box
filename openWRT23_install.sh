@@ -118,10 +118,10 @@ if [ "$RESET_ANSWER" = "y" ]
     		uci set unbound.ub_main.listen_port='5353'
   		processes=$(uci commit && reload_config)
     		wait $processes
-      		processes1=$(/etc/init.d/or restart)
+      		processes1=$(/etc/init.d/unbound restart)
     		wait $processes1
-      		processes=$(uci commit && reload_config)
-    		wait $processes
+      		processes2=$(/etc/init.d/tor restart)
+    		wait $processes2
 		## set_unbound_reset
 		## set_tor_reset
 		exit 0
