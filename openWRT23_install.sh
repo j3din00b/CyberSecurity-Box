@@ -4413,6 +4413,8 @@ cat << EOF > /etc/hosts
 127.0.0.1 localhost
 127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 140.82.121.3	github.com
+151.101.2.132	downloads.openwrt.org
+64.226.122.113	www.openwrt.org
 
 ::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
 ::1     localhost ip6-localhost ip6-loopback
