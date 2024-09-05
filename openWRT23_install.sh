@@ -4530,10 +4530,6 @@ view_config
 /etc/init.d/unbound restart  >> install.log
 }
 
-
-}
-
-
 set_unbound_reset() {
 mkdir -p /etc/unbound/unbound.conf.d >> install.log
 curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache >> install.log
