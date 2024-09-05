@@ -4402,6 +4402,138 @@ echo
 
 }
 
+set_unbound() {
+mkdir -p /etc/unbound/unbound.conf.d >> install.log
+curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache >> install.log
+curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&showintro=0&mimetype=plaintext" > /etc/unbound/unbound.conf.d/unbound_ad_servers
+
+cat << EOF > /etc/hosts
+127.0.0.1 localhost
+127.0.0.1 dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+140.82.121.3    github.com
+151.101.2.132   downloads.openwrt.org
+64.226.122.113  www.openwrt.org
+
+::1     dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+EOF
+
+uci set unbound.ub_main.tls_cert_bundle='/var/lib/unbound/ca-certificates.crt'
+uci set unbound.ub_main.auto_trust_anchor_file='/var/lib/unbound/root.key'
+uci set unbound.ub_main.root_hints='/var/lib/unbound/root.hints'
+
+uci set unbound.ub_main=unbound
+uci set unbound.ub_main.dhcp_link='dnsmasq'
+uci set unbound.ub_main.dns64='0'
+uci set unbound.ub_main.domain='lan'
+uci set unbound.ub_main.edns_size='1232'
+uci set unbound.ub_main.extended_stats='0'
+
+uci set unbound.ub_main.hide_binddata='1'
+uci set unbound.ub_main.interface_auto='1'
+uci set unbound.ub_main.interface_auto='1'
+uci set unbound.ub_main.listen_port=$DNS_UNBOUND_port
+uci set unbound.ub_main.localservice='1'
+
+uci set unbound.ub_main.manual_conf='0'
+uci set unbound.ub_main.num_threads='1'
+uci set unbound.ub_main.protocol='ip4_only'
+uci set unbound.ub_main.rate_limit='0'
+
+uci set unbound.ub_main.rebind_localhost='0'
+uci set unbound.ub_main.rebind_protection='1'
+uci set unbound.ub_main.recursion='passive'
+uci set unbound.ub_main.resource='small'
+uci set unbound.ub_main.root_age='9'
+uci set unbound.ub_main.ttl_min='120'
+uci set unbound.ub_main.ttl_neg_max='1000'
+uci set unbound.ub_main.unbound_control='0'
+
+uci set unbound.ub_main.query_minimize='1'
+uci set unbound.ub_main.query_min_strict='1'
+
+uci set unbound.ub_main.validator='1'
+uci set unbound.ub_main.verbosity='1'
+
+uci add_list unbound.ub_main.outgoing_port_permit=$SDNS_port
+uci add_list unbound.ub_main.outgoing_port_permit=$TOR_SOCKS_port
+uci add_list unbound.ub_main.outgoing_port_permit='9150'
+uci add_list unbound.ub_main.outgoing_port_permit=$DNS_TOR_port
+uci add_list unbound.ub_main.outgoing_port_permit='9153'
+uci add_list unbound.ub_main.outgoing_port_avoid='1-9029'
+uci add_list unbound.ub_main.outgoing_port_avoid='9061-65335'
+
+uci add_list unbound.ub_main.domain_insecure='onion'
+uci add_list unbound.ub_main.domain_insecure='exit'
+uci add_list unbound.ub_main.private_domain='exit'
+uci add_list unbound.ub_main.private_domain='onion'
+
+uci set unbound.ub_main.do_not_query_localhost='no'
+
+uci delete unbound.fwd_google
+uci delete unbound.fwd_isp
+uci delete unbound.auth_icann
+uci delete unbound.fwd_cloudflare
+UNBOUND_Relay_port='5353'
+if  [ "$UNBOUND_Relay_port" = "5353" ] 
+	then
+		uci add unbound zone
+		uci set unbound.@zone[-1].name=$EXIT_domain
+		uci set unbound.@zone[-1].zone_type='forward_zone'
+		uci set unbound.@zone[-1].forward_addr='127.0.0.1 @'$DNS_TOR_port
+		uci add unbound zone
+		uci set unbound.@zone[-1].name=$ONION_domain
+		uci set unbound.@zone[-1].zone_type='forward_zone'
+		uci set unbound.@zone[-1].forward_addr='127.0.0.1 @'$DNS_TOR_port
+		uci add unbound zone
+		uci set unbound.@zone[-1].name='.'
+		uci set unbound.@zone[-1].zone_type='forward_zone'
+		uci set unbound.@zone[-1].fallback='0'	
+		uci set unbound.@zone[-1].tls_upstream='1'
+		uci set unbound.@zone[-1].tls_index='dns.cloudflair'
+		uci set unbound.@zone[-1].forward_tls_upstream='yes'
+		uci set unbound.@zone[-1].forward_addr='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion @'$DNS_TOR_port
+	else
+ 		uci add unbound zone
+		uci set unbound.@zone[-1].name='.'
+		uci set unbound.@zone[-1].enabled='1'
+		uci set unbound.@zone[-1].zone_type='forward_zone'
+		uci set unbound.@zone[-1].fallback='0'	
+		uci set unbound.@zone[-1].tls_upstream='1'
+		uci set unbound.@zone[-1].tls_index='dns.cloudflair'
+		uci set unbound.@zone[-1].forward_tls_upstream='yes'
+		uci set unbound.@zone[-1].forward_addr='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion @'$UNBOUND_Relay_port
+fi
+processes=$(uci commit && reload_config)
+wait $processes >> install.log
+/etc/init.d/unbound restart  >> install.log
+
+echo
+echo 'On Error enter logread'
+echo
+
+clear
+echo
+echo '########################################################'
+echo '#                                                      #'
+echo '#                 CyberSecurity-Box                    #'
+echo '#                                                      #'
+echo '# local Privacy for Voice-Assistent Smart-TV SmartHome #'
+echo '#                                                      #'
+echo '#   Unbound lokal DNS-Resolver with lokal root-files   #'
+echo '#                                                      #'
+echo '########################################################'
+view_config
+
+/etc/init.d/unbound restart  >> install.log
+}
+
+
+}
+
+
 set_unbound_reset() {
 mkdir -p /etc/unbound/unbound.conf.d >> install.log
 curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache >> install.log
@@ -4462,7 +4594,15 @@ uci add_list unbound.ub_main.outgoing_port_permit=$TOR_SOCKS_port
 uci add_list unbound.ub_main.outgoing_port_permit='9150'
 uci add_list unbound.ub_main.outgoing_port_permit=$DNS_TOR_port
 uci add_list unbound.ub_main.outgoing_port_permit='9153'
-uci add_list unbound.ub_main.outgoing_port_permit='10240-65335'
+uci add_list unbound.ub_main.outgoing_port_avoid='1-9029'
+uci add_list unbound.ub_main.outgoing_port_avoid='9061-65335'
+
+uci add_list unbound.ub_main.domain_insecure='onion'
+uci add_list unbound.ub_main.domain_insecure='exit'
+uci add_list unbound.ub_main.private_domain='exit'
+uci add_list unbound.ub_main.private_domain='onion'
+
+uci set unbound.ub_main.do_not_query_localhost='no'
 
 uci delete unbound.fwd_google
 uci delete unbound.fwd_isp
@@ -4501,7 +4641,7 @@ fi
 }
 
 
-set_unbound() {
+set_unbound_test0824() {
 mkdir -p /etc/unbound/unbound.conf.d >> install.log
 curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache >> install.log
 curl -sS -L "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&showintro=0&mimetype=plaintext" > /etc/unbound/unbound.conf.d/unbound_ad_servers
