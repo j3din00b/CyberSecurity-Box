@@ -16,8 +16,9 @@
   <img src="/Firmware_Config.png" alt="select_packages" width="50%"> </img><br><br>
   And in the field <code>Script to run on first boot (uci-defaults)</code> insert.<br><br>
   <pre><code>cat << EOF > /etc/rc.local
-	  wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh -P /root/ && sh openWRT23_install.sh
-  EOF</code></pre>
+	  wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh -P /root/ && sh /root/openWRT23_install.sh
+EOF
+</code></pre>
   Then press <code>Request Build</code>.<br><br>
   <img src="/Request_build.png" alt="select_packages" width="50%"> </img>.<br><br>
   Afterwards generate the File with <code>Kernel</code> and download it.<br><br>
