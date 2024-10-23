@@ -1407,87 +1407,87 @@ if [ ! -f "$FILE" ]
 }
 
 customize_firmware_sub() {
-uci set system.@system[0]=system
-uci set system.@system[0].ttylogin='0'
-uci set system.@system[0].log_size='64'
-uci set system.@system[0].urandom_seed='0'
-uci set system.@system[0].log_proto='udp'
-uci set system.@system[0].conloglevel='1'
-uci set system.@system[0].cronloglevel='9'
-uci set system.@system[0].timezone='CET-1CEST,M3.5.0,M10.5.0/3'
-uci set system.@system[0].zonename='Europe/Berlin'
-uci set system.@system[0].hostname='CyberSecurity-Box'
-uci set system.@system[0].description='CyberSecurity-Box with Tor-Onion-Services'
-uci delete system.ntp.server
-uci add_list system.ntp.server=$INET_GW 
-uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
-uci add_list system.ntp.server='1.pool.ntp.org'
-uci add_list system.ntp.server='2.openwrt.pool.ntp.org'
-uci add_list system.ntp.server='3.pool.ntp.org'
-uci set uhttpd.defaults.country='DE'
-uci set uhttpd.defaults.state=''
-uci set uhttpd.defaults.location='DMZ'
-uci set uhttpd.defaults.commonname=$LAN
-uci -q delete uhttpd.main.listen_http
-uci add_list uhttpd.main.listen_http="0.0.0.0:80"
-uci add_list uhttpd.main.listen_http="[::]:80"
-uci -q delete uhttpd.main.listen_https
-uci add_list uhttpd.main.listen_https="0.0.0.0:8443"
-uci add_list uhttpd.main.listen_https="[::]:8443"
-uci set luci.main.mediaurlbase='/luci-static/bootstrap-dark'
-uci set uhttpd.main.redirect_https='1'
-processes=$(uci commit && reload_config)
-wait $processes  >> install.log
-/etc/init.d/uhttpd restart  >> install.log
+#uci set system.@system[0]=system
+#uci set system.@system[0].ttylogin='0'
+#uci set system.@system[0].log_size='64'
+#uci set system.@system[0].urandom_seed='0'
+#uci set system.@system[0].log_proto='udp'
+#uci set system.@system[0].conloglevel='1'
+#uci set system.@system[0].cronloglevel='9'
+#uci set system.@system[0].timezone='CET-1CEST,M3.5.0,M10.5.0/3'
+#uci set system.@system[0].zonename='Europe/Berlin'
+#uci set system.@system[0].hostname='CyberSecurity-Box'
+#uci set system.@system[0].description='CyberSecurity-Box with Tor-Onion-Services'
+#uci delete system.ntp.server
+#uci add_list system.ntp.server=$INET_GW 
+#uci add_list system.ntp.server='0.openwrt.pool.ntp.org'
+#uci add_list system.ntp.server='1.pool.ntp.org'
+#uci add_list system.ntp.server='2.openwrt.pool.ntp.org'
+#uci add_list system.ntp.server='3.pool.ntp.org'
+#uci set uhttpd.defaults.country='DE'
+#uci set uhttpd.defaults.state=''
+#uci set uhttpd.defaults.location='DMZ'
+#uci set uhttpd.defaults.commonname=$LAN
+#uci -q delete uhttpd.main.listen_http
+#uci add_list uhttpd.main.listen_http="0.0.0.0:80"
+#uci add_list uhttpd.main.listen_http="[::]:80"
+#uci -q delete uhttpd.main.listen_https
+#uci add_list uhttpd.main.listen_https="0.0.0.0:8443"
+#uci add_list uhttpd.main.listen_https="[::]:8443"
+#uci set luci.main.mediaurlbase='/luci-static/bootstrap-dark'
+#uci set uhttpd.main.redirect_https='1'
+#processes=$(uci commit && reload_config)
+#wait $processes  >> install.log
+#/etc/init.d/uhttpd restart  >> install.log
 
-echo
-echo 'Default Country-Settings'
-echo 
-
-
-echo
-echo 'https activated'
-echo
-
-cat << EOF > /etc/banner
-
-  +++         +                  +++               +++++
- +   +        +                 +   +              +    +
-+             +                 +                  +    + 
-+             +                 +                  +    +
-+      +   +  +++    ++   +  ++  +++    ++    ++   +++++    ++   +   +
-+       + +   +  +  +  +  + +       +  +  +  +  +  +    +  +  +   + +
-+        +    +  +  +++   ++        +  +++   +     +    +  +  +    +
- +   +   +    +  +  +     +     +   +  +     +  +  +    +  +  +   + +
-  +++    +    +++    +++  +      +++    +++   ++   +++++    ++   +   +
- 
-      local Privacy for Voice-Assistents, Smart-TVs and SmartHome 
-	   
---------------------------------------------------------------------------
-   powered by OpenWrt $(echo $release), $(echo $revision)
---------------------------------------------------------------------------
+#echo
+#echo 'Default Country-Settings'
+#echo 
 
 
-EOF
+#echo
+#echo 'https activated'
+#echo
 
-cat << EOF > /etc/openwrt_release
-DISTRIB_ID='CyberSecurity-Box'
-DISTRIB_RELEASE='$(echo $release)'
-DISTRIB_REVISION='$(echo $revision)'
-DISTRIB_TARGET='$(echo $target)'
-DISTRIB_ARCH='$(echo $architecture)'
-DISTRIB_DESCRIPTION='CyberSecurity-Box $(echo $revision)'
-DISTRIB_TAINTS=''
-EOF
+#cat << EOF > /etc/banner
+#
+#  +++         +                  +++               +++++
+# +   +        +                 +   +              +    +
+#+             +                 +                  +    + 
+#+             +                 +                  +    +
+#+      +   +  +++    ++   +  ++  +++    ++    ++   +++++    ++   +   +
+#+       + +   +  +  +  +  + +       +  +  +  +  +  +    +  +  +   + +
+#+        +    +  +  +++   ++        +  +++   +     +    +  +  +    +
+# +   +   +    +  +  +     +     +   +  +     +  +  +    +  +  +   + +
+#  +++    +    +++    +++  +      +++    +++   ++   +++++    ++   +   +
+# 
+#      local Privacy for Voice-Assistents, Smart-TVs and SmartHome 
+#	   
+#--------------------------------------------------------------------------
+#   powered by OpenWrt $(echo $release), $(echo $revision)
+#--------------------------------------------------------------------------
+#
+#
+#EOF
+
+#cat << EOF > /etc/openwrt_release
+#DISTRIB_ID='CyberSecurity-Box'
+#DISTRIB_RELEASE='$(echo $release)'
+#DISTRIB_REVISION='$(echo $revision)'
+#DISTRIB_TARGET='$(echo $target)'
+#DISTRIB_ARCH='$(echo $architecture)'
+#DISTRIB_DESCRIPTION='CyberSecurity-Box $(echo $revision)'
+#DISTRIB_TAINTS=''
+#EOF
 
 
-cat << EOF > /etc/device_info
-DEVICE_MANUFACTURER='@CyberAndi'
-DEVICE_MANUFACTURER_URL='https://cyberandi.tumblr.com/'
-DEVICE_PRODUCT='CyberSecurity-Box'
-DEVICE_REVISION='v0.78'
+#cat << EOF > /etc/device_info
+#DEVICE_MANUFACTURER='@CyberAndi'
+#DEVICE_MANUFACTURER_URL='https://cyberandi.tumblr.com/'
+#DEVICE_PRODUCT='CyberSecurity-Box'
+#DEVICE_REVISION='v0.78'
 
-EOF
+#EOF
 
 FILE=/root/openWRT*.sh
 if [ "$(ls openWRT*.sh)" != "" ]
@@ -1518,56 +1518,93 @@ echo
 echo 'Sichere alte Konfiguration'
 #iptables-save > rules.v4_old_$datum.bkp
 
-FILE=/www/luci-static/bootstrap/OCR-A.ttf
-if [ ! -f "$FILE" ] 
-	then
-		if [ "$(ls /www/luci-static/bootstrap/c*.css)" != "" ]
-			then
-				processes=$(rm /www/luci-static/bootstrap/c*.css)
-		fi
+#FILE=/www/luci-static/bootstrap/OCR-A.ttf
+#if [ ! -f "$FILE" ] 
+#	then
+#		if [ "$(ls /www/luci-static/bootstrap/c*.css)" != "" ]
+#			then
+#				processes=$(rm /www/luci-static/bootstrap/c*.css)
+#		fi
+#
+#		wait $processes
+#		if [ "$(ls /www/luci-static/resources/view/dashboard/css/c*.css)" != "" ]
+#			then
+#				processes=$(rm /www/luci-static/resources/view/dashboard/css/c*.css)
+#		fi
+#
+#		wait $processes
+#		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.png -P /www/luci-static/bootstrap/)
+#		wait $processes
+#		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.svg -P /www/luci-static/bootstrap/)
+#		wait $processes
+#		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberAndi.svg -P /www/luci-static/bootstrap/)
+#		wait $processes1
+#		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/cascade.css -P /www/luci-static/bootstrap/)
+#		wait $processes1
+#		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.ttf -P /www/luci-static/bootstrap/)
+#		wait $processes1
+#		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.woff -P /www/luci-static/bootstrap/)
+#		wait $processes1
+#
+#fi
+#
+#
+#FILE1=/www/luci-static/resources/view/dashboard/css/c*.css
+#if [ ! -f "$FILE" ]
+#	then
+#		wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/custom.css -P /www/luci-static/resources/view/dashboard/css/
+#
+#		mv /www/luci-static/resources/view/status/include/*_system.js /www/luci-static/resources/view/status/include/90_system.js
+#		mv /www/luci-static/resources/view/status/include/*_memory.js /www/luci-static/resources/view/status/include/10_memory.js
+#		mv /www/luci-static/resources/view/status/include/*_storage.js /www/luci-static/resources/view/status/include/15_storage.js
+#		mv /www/luci-static/resources/view/status/include/*_dsl.js /www/luci-static/resources/view/status/include/20_dsl.js
+#		mv /www/luci-static/resources/view/status/include/*_ports.js /www/luci-static/resources/view/status/include/21_ports.js
+#		mv /www/luci-static/resources/view/status/include/*_network.js /www/luci-static/resources/view/status/include/22_network.js
+#		mv /www/luci-static/resources/view/status/include/*_dhcp.js /www/luci-static/resources/view/status/include/25_dhcp.js
+#		mv /www/luci-static/resources/view/status/include/*_wifi.js /www/luci-static/resources/view/status/include/30_wifi.js
+#fi
+#
+#
+uci set dhcp.@dnsmasq[-1].noresolv='1'
+uci add_list dhcp.@dnsmasq[-1].server='127.0.0.1#9053'
+uci commit dhcp && reolad_config
+cat << EOF > /www/index.html
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<link rel="stylesheet" href="/luci-static/bootstrap-dark/cascade.css">
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+		<meta http-equiv="Expires" content="Thu, 01 Jan 1970 00:00:00 GMT" />
+		<meta http-equiv="refresh" content="0; URL=cgi-bin/luci/" />
+		<style type="text/css">
+			body { background: white; font-family: arial, helvetica, sans-serif; margin: auto !important; padding: auto !important;}
+			a { color: #cccccc !important; margin: auto !important; height: 5em !important; align: center !important;}
 
-		wait $processes
-		if [ "$(ls /www/luci-static/resources/view/dashboard/css/c*.css)" != "" ]
-			then
-				processes=$(rm /www/luci-static/resources/view/dashboard/css/c*.css)
-		fi
-
-		wait $processes
-		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.png -P /www/luci-static/bootstrap/)
-		wait $processes
-		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.svg -P /www/luci-static/bootstrap/)
-		wait $processes
-		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberAndi.svg -P /www/luci-static/bootstrap/)
-		wait $processes1
-		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/cascade.css -P /www/luci-static/bootstrap/)
-		wait $processes1
-		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.ttf -P /www/luci-static/bootstrap/)
-		wait $processes1
-		processes1=$(wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.woff -P /www/luci-static/bootstrap/)
-		wait $processes1
-
-fi
-
-
-FILE1=/www/luci-static/resources/view/dashboard/css/c*.css
-if [ ! -f "$FILE" ]
-	then
-		wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/custom.css -P /www/luci-static/resources/view/dashboard/css/
-
-		mv /www/luci-static/resources/view/status/include/*_system.js /www/luci-static/resources/view/status/include/90_system.js
-		mv /www/luci-static/resources/view/status/include/*_memory.js /www/luci-static/resources/view/status/include/10_memory.js
-		mv /www/luci-static/resources/view/status/include/*_storage.js /www/luci-static/resources/view/status/include/15_storage.js
-		mv /www/luci-static/resources/view/status/include/*_dsl.js /www/luci-static/resources/view/status/include/20_dsl.js
-		mv /www/luci-static/resources/view/status/include/*_ports.js /www/luci-static/resources/view/status/include/21_ports.js
-		mv /www/luci-static/resources/view/status/include/*_network.js /www/luci-static/resources/view/status/include/22_network.js
-		mv /www/luci-static/resources/view/status/include/*_dhcp.js /www/luci-static/resources/view/status/include/25_dhcp.js
-		mv /www/luci-static/resources/view/status/include/*_wifi.js /www/luci-static/resources/view/status/include/30_wifi.js
-fi
-
-
-echo
-echo 'On Error enter logread'
-echo
+			@media (prefers-color-scheme: dark) {
+				body { background: black; }
+				a { color: #cccccc !important; margin: auto !important; height: 5em !important; align: center !important;}
+			}
+		</style>
+	</head>
+	<body>
+		<div id="maincontent" class="container">
+			<center>
+				<br>
+				<br>
+				<h2 name="content" class="sk-check-for-highlights"><a href="cgi-bin/luci/">CyberSecurity-Box Configuration Interface</a></h2>
+				<br>
+				<br>
+			</center>
+		</div>
+	</body>
+</html>
+EOF
+#echo
+#echo 'On Error enter logread'
+#echo
 }
 
 create_hotspot(){
@@ -21675,7 +21712,12 @@ set_dhcp_sub() {
 		uci add_list dhcp.Blacklist.interface='br-lan.1'
 		uci set dhcp:Blacklist.filter_a='0'
 		uci set dhcp:Blacklist.filter_aaaa='1'
-
+		if [ "$DNS_IP" != "127.0.0.1" ]
+			then
+				uci set dhcp.Blacklist.server=$DNS_IP'#'$DNSMASQ_Relay_port
+			else
+				uci set dhcp.Blacklist.server=$LAN_ip'#'$DNSMASQ_Relay_port
+		fi
 		if [ "$main_release" != "23" ] 
 			then
 
@@ -21712,6 +21754,12 @@ set_dhcp_sub() {
 				uci add_list dhcp.Whitelist.notinterface='br-lan.1'
 				uci set dhcp:Whitelist.filter_a='0'
 				uci set dhcp:Whitelist.filter_aaaa='1'
+    				if [ "$DNS_IP" != "127.0.0.1" ]
+					then
+						uci set dhcp.Whitelist.server=$DNS_IP'#'$DNSMASQ_Relay_port
+					else
+						uci set dhcp.Whitelist.server=$LAN_ip'#'$DNSMASQ_Relay_port
+				fi
 		fi
 		uci set dhcp.CMOVIE=dhcp
 		uci set dhcp.CMOVIE.interface='CMOVIE'
