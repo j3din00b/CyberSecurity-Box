@@ -66,8 +66,8 @@ exit 0
 [newpassword]
 [newpassword]</code></pre>
   Don´t forget to note the <i><b>newpassword</b></i>. Now go to the <a href="#afterreboot">Network-Overview </a>.
-<br><br>
-  If you didn´t insert the <code>Script to run on first boot (uci-defaults)</code> then download the Installscript. It starts automatically.<br>
+<br><br><details>
+  <summary>If you didn´t insert the <code>Script to run on first boot (uci-defaults)</code> then download the Installscript. (Please open here). </summary> It starts automatically.
 Else skip this Part and go to <a href="#afterreboot">Network-Overview </a>.<br><br>
   for OpenWRT Version 23.x.xx<br><br>
   <pre><code>wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh && sh openWRT23_install.sh</code></pre>
@@ -83,6 +83,8 @@ Else skip this Part and go to <a href="#afterreboot">Network-Overview </a>.<br><
   <br> Now it will appear some Questions about your Network and your Devices.  <b>Note: All Values needed !!</b>.
  <p><p>
   <img src="https://user-images.githubusercontent.com/46010442/127338090-c8fa4a0c-c2ec-4e62-938e-9c5b6320bd41.jpg" width="50%"></img>
+  </code>
+  </details>
 </li>
 <h3><li id="afterreboot">
    After the reboot you will have following Networks:</h3>
