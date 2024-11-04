@@ -16,8 +16,40 @@
   <img src="/Firmware_Config.png" alt="select_packages" width="50%"> </img><br><br>
   And in the field <code>Script to run on first boot (uci-defaults)</code> insert.<br><br>
   <pre><code>cat << EOF > /etc/rc.local
-	  wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh -P /root/ && sh /root/openWRT23_install.sh
+	if [ ! -f /www/luci-static/bootstrap/OCR-A.ttf ] 
+		then
+			if  [ -f /www/luci-static/bootstrap/cascade.css ]
+				then
+					rm /www/luci-static/bootstrap/c*.css
+					rm /www/luci-static/resources/view/dashboard/css/c*.css
+			fi
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.png -P /www/luci-static/bootstrap/
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.svg -P /www/luci-static/bootstrap/
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberAndi.svg -P /www/luci-static/bootstrap/
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/cascade.css -P /www/luci-static/bootstrap/
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.ttf -P /www/luci-static/bootstrap/
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.woff -P /www/luci-static/bootstrap/
+	fi
+	if [ ! -f /www/luci-static/resources/view/dashboard/css/custom.css ]
+		then
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/custom.css -P /www/luci-static/resources/view/dashboard/css/
+	fi
+	if [ ! -f /root/openWRT23_install.sh ]
+		then
+			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh -P /root/ && sh /root/openWRT23_install.sh
+		else
+			rm /root/*.sh
+	fi
+	if [ ! -f /root/run ] 
+		then
+			echo $(date) > /root/run
+			exit 0
+	fi
+	cat << EOF > /etc/rc.local
+	EOF
+	exit 0
 EOF
+exit 0   
 </code></pre>
   Then press <code>Request Build</code>.<br><br>
   <img src="/Request_build.png" alt="select_packages" width="50%"> </img>.<br><br>
@@ -33,7 +65,8 @@ EOF
   <pre><code>passwd
 [newpassword]
 [newpassword]</code></pre>
-  Don´t forget to note the <i><b>newpassword</b></i>.<br><br>
+  Don´t forget to note the <i><b>newpassword</b></i>. Now go to the <a href="#afterreboot">Network-Overview</a>.
+<br><br>
   Download the Installscript. It starts automatically.<br>
   for OpenWRT Version 23.x.xx<br><br>
   <pre><code>wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh && sh openWRT23_install.sh</code></pre>
@@ -47,10 +80,11 @@ EOF
   for OpenWRT Version 19.x.xx<br><br>
   <pre><code>wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT19_install.sh && sh openWRT19_install.sh</code></pre>
   <br> Now it will appear some Questions about your Network and your Devices.  <b>Note: All Values needed !!</b>.
- <p>
+ <p><p>
   <img src="https://user-images.githubusercontent.com/46010442/127338090-c8fa4a0c-c2ec-4e62-938e-9c5b6320bd41.jpg" width="50%"></img>
-<p>
-   After the reboot you will have following Networks:<br><br>
+</li>
+<h3><li id="afterreboot">
+   After the reboot you will have following Networks:</h3>
     <ul>
     <li><b>REPEATER</b> for internal Communication between Router and Repeater for all of this Networks</li>
       <li><b>VOICE</b> for Amazon Alexa, Google Assistent or other Voice Assistent-Systems</li>
@@ -67,7 +101,7 @@ EOF
   You will find the Screenshots <a href="https://github.com/CyberAndi/CyberSecurity-Box/blob/CyberAndi-Pi-Hole-5/README.md#screenshots">here</a>. 
   </li>
   
-  <h3><li>Alternative 2 - Installation CyberSecurity-Box ( <img src="/RaspBerry.png" style="max-width: 100%; vertical-align: middle; padding: 0em; height:1em" height="20px"></img>RaspPi)</li></h3>
+  <h3> <li>Alternative 2 - Installation CyberSecurity-Box ( <img src="/RaspBerry.png" style="max-width: 100%; vertical-align: middle; padding: 0em; height:1em" height="20px"></img>RaspPi)</li></h3>
   You need a Raspberry Pi and a SD-Card with 8 GByte or more.
   Use a blank <b><a href="https://www.raspberrypi.org/downloads/raspbian/" target="_blank">Raspbian-SD-Card-Image</a></b> or 
   <b>CyberSecurityBox_2.img</b> is the Pi-Hole, UnBound and torrc with a ready-to-use Image.
@@ -145,7 +179,7 @@ service pihole-FTL start</code></pre>
 For more Information in german visit <a href="https://cyberandi.tumblr.com/Smarthome" target="_blank">https://cyberandi.tumblr.com/Smarthome</a>
 </p>
 <hr>
-&copy; CyberAndi 2019-2023 
+&copy; CyberAndi 2019-2024 
 
 email: cyberandi@outlook.de<br>
 https://cyberandi.tumblr.com
