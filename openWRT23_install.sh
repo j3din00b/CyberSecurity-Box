@@ -21648,7 +21648,8 @@ set_dhcp_sub() {
 		uci set dhcp.Blacklist.ednspacket_max='1232'
 		uci set dhcp.Blacklist.cachelocal='1'
 		uci set dhcp.Blacklist.cachesize='0'
-		uci set dhcp.Blacklist.queryport=$DNSMASQ_Relay_port
+		uci set dhcp.Blacklist.server=$DNS_IP'#'$DNSMASQ_Relay_port 
+  		#uci set dhcp.Blacklist.queryport=$DNSMASQ_Relay_port
 		uci set dhcp.Blacklist.leasefile='/tmp/dhcp.leases'
 		uci set dhcp.Blacklist.resolvfile='/tmp/resolv.conf.d/resolv.conf.auto'
 		uci set dhcp.Blacklist.confdir='/etc/dnsmasq.d/Blacklist/'
@@ -21695,7 +21696,7 @@ set_dhcp_sub() {
 				uci set dhcp.Whitelist.ednspacket_max='1232'
 				uci set dhcp.Whitelist.cachelocal='1'
 				uci set dhcp.Whitelist.cachesize='0'
-				uci set dhcp.Whitelist.queryport=$DNSMASQ_Relay_port
+				uci set dhcp.Whitelist.server=$DNS_IP'#'$DNSMASQ_Relay_port
 				uci set dhcp.Whitelist.leasefile='/tmp/dhcp.leases'
 				uci set dhcp.Whitelist.resolvfile='/tmp/resolv.conf.d/resolv.conf.auto'
 				uci set dhcp.Whitelist.confdir='/etc/dnsmasq.d/Whitelist/'
