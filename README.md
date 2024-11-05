@@ -16,24 +16,6 @@ For the Raspberry-Pi Installation goto <b><a href="#raspi">Alternative 2</a></b>
   <img src="/Firmware_Config.png" alt="select_packages" width="50%"> </img><br><br>
   And in the field <code>Script to run on first boot (uci-defaults)</code> insert.<br><br>
   <pre><code>cat << EOF > /etc/rc.local
-	if [ ! -f /www/luci-static/bootstrap/OCR-A.ttf ] 
-		then
-			if  [ -f /www/luci-static/bootstrap/cascade.css ]
-				then
-					rm /www/luci-static/bootstrap/c*.css
-					rm /www/luci-static/resources/view/dashboard/css/c*.css
-			fi
-			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.png -P /www/luci-static/bootstrap/
-			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberSecurity-Box.svg -P /www/luci-static/bootstrap/
-			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/CyberAndi.svg -P /www/luci-static/bootstrap/
-			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/cascade.css -P /www/luci-static/bootstrap/
-			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.ttf -P /www/luci-static/bootstrap/
-			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/OCR-A.woff -P /www/luci-static/bootstrap/
-	fi
-	if [ ! -f /www/luci-static/resources/view/dashboard/css/custom.css ]
-		then
-			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/custom.css -P /www/luci-static/resources/view/dashboard/css/
-	fi
 	if [ ! -f /root/openWRT23_install.sh ]
 		then
 			wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh -P /root/ && sh /root/openWRT23_install.sh
@@ -47,7 +29,6 @@ For the Raspberry-Pi Installation goto <b><a href="#raspi">Alternative 2</a></b>
 	fi
 	cat << EOF > /etc/rc.local
 	EOF
-	exit 0
 EOF
 exit 0   
 </code></pre>
