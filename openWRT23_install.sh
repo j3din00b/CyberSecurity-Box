@@ -11113,6 +11113,7 @@ server=/outlook.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 server=/outlook.live.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 server=/pcwelt.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 server=/pc-welt.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
+server=/perplexity.ai/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 server=/philips.com/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 server=/philips.de/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
 server=/philips.nl/$(echo $DNS_IP)#$(echo $DNSMASQ_Relay_port)
@@ -11872,6 +11873,7 @@ local-zone: "outlook.de" transparent
 local-zone: "outlook.live.com" transparent
 local-zone: "pcwelt.de" transparent
 local-zone: "pc-welt.de" transparent
+local-zone: "perplexity.ai" transparent
 local-zone: "philips.com" transparent
 local-zone: "philips.de" transparent
 local-zone: "philips.nl" transparent
