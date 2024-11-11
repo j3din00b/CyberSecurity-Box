@@ -4482,11 +4482,11 @@ if  [ "$UNBOUND_Relay_port" = "5353" ]
 		uci add unbound zone
 		uci set unbound.@zone[-1].name=$EXIT_domain
 		uci set unbound.@zone[-1].zone_type='forward_zone'
-		uci set unbound.@zone[-1].forward_addr='127.0.0.1 @'$DNS_TOR_port
+		uci set unbound.@zone[-1].forward_addr='127.0.0.1@'$DNS_TOR_port
 		uci add unbound zone
 		uci set unbound.@zone[-1].name=$ONION_domain
 		uci set unbound.@zone[-1].zone_type='forward_zone'
-		uci set unbound.@zone[-1].forward_addr='127.0.0.1 @'$DNS_TOR_port
+		uci set unbound.@zone[-1].forward_addr='127.0.0.1@'$DNS_TOR_port
 		uci add unbound zone
 		uci set unbound.@zone[-1].name='.'
 		uci set unbound.@zone[-1].zone_type='forward_zone'
@@ -4494,7 +4494,7 @@ if  [ "$UNBOUND_Relay_port" = "5353" ]
 		uci set unbound.@zone[-1].tls_upstream='1'
 		uci set unbound.@zone[-1].tls_index='dns.cloudflair'
 		uci set unbound.@zone[-1].forward_tls_upstream='yes'
-		uci set unbound.@zone[-1].forward_addr='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion @'$DNS_TOR_port
+		uci set unbound.@zone[-1].forward_addr='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion@'$DNS_TOR_port
 	else
  		uci add unbound zone
 		uci set unbound.@zone[-1].name='.'
@@ -4504,7 +4504,7 @@ if  [ "$UNBOUND_Relay_port" = "5353" ]
 		uci set unbound.@zone[-1].tls_upstream='1'
 		uci set unbound.@zone[-1].tls_index='dns.cloudflair'
 		uci set unbound.@zone[-1].forward_tls_upstream='yes'
-		uci set unbound.@zone[-1].forward_addr='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion @'$UNBOUND_Relay_port
+		uci set unbound.@zone[-1].forward_addr='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion@'$UNBOUND_Relay_port
 fi
 processes=$(uci commit && reload_config)
 wait $processes >> install.log
