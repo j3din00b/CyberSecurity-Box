@@ -22410,6 +22410,11 @@ wait $processes >> install.log
 }
 
 create_firewall_zones() {
+uci del firewall.@zone[0].network
+uci add_list firewall.@zone[0].network='lan'
+processes=$(uci commit && reload_config)
+wait $processes >> install.log
+
 uci add firewall zone >> install.log
 uci set firewall.@zone[-1]=zone
 uci set firewall.@zone[-1].name="REPEATER"
