@@ -1436,6 +1436,9 @@ uci add_list uhttpd.main.listen_https="0.0.0.0:8443"
 uci add_list uhttpd.main.listen_https="[::]:8443"
 uci set luci.main.mediaurlbase='/luci-static/bootstrap-dark'
 uci set uhttpd.main.redirect_https='1'
+uci set luci.diag.ping='cmovie.4lima.de'
+uci set luci.diag.route='cmovie.4lima.de'
+uci set luci.diag.dns='bible4u2lvhacg4b3to2e2veqpwmrc2c3tjf2wuuqiz332vlwmr4xbad.onion'
 processes=$(uci commit && reload_config)
 wait $processes  >> install.log
 /etc/init.d/uhttpd restart  >> install.log
