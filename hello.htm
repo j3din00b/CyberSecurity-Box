@@ -3,14 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<link rel="stylesheet" href="/luci-static/bootstrap-dark/cascade.css">
-		<link rel="preload" href="/luci-static/bootstrap-dark/cascade.css">
-		<link rel="preload" href="/luci-static/bootstrap/OCRAStd.woff" as="font">
-		<link rel="preload" href="/luci-static/bootstrap/CyberSecurity-Box.svg">
-		<link rel="preload" href="/luci-static/bootstrap/CyberAndi.svg">
 		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 		<meta http-equiv="Pragma" content="no-cache" />
 		<meta http-equiv="Expires" content="0" />
 		<meta http-equiv="Expires" content="Thu, 01 Jan 1970 00:00:00 GMT" />
+		<link rel="preload" href="/luci-static/bootstrap-dark/cascade.css">
+		<link rel="preload" href="/luci-static/bootstrap/OCRAStd.woff" as="font">
+		<link rel="preload" href="/luci-static/bootstrap/CyberSecurity-Box.svg">
+		<link rel="preload" href="/luci-static/bootstrap/CyberAndi.svg">
 		<style type="text/css">
 			@font-face {
 				font-family: 'OCR A Std';
@@ -184,8 +184,8 @@
 				position: fixed;
 				top: 0;
 				bottom: 0;
-				background: rgba(0,0,0,0.7);
-				backdrop-filter: blur(3.5px);
+				background: rgba(0,0,0,0.6) !important;
+				backdrop-filter: blur(1.5px) !important;
 				overflow: auto;
 				transition: opacity .35s ease-in;
 				opacity: 0;
@@ -233,8 +233,11 @@
 			}
 
 			.bubble-container  {
-				filter: drop-shadow(0 0px 8px rgba(var(--focus-color-rgb),0.8));
-				opacity: 0.7;
+				filter: drop-shadow(0px 0px 12px rgba(var(--focus-color-rgb),0.8));
+				opacity: 0.9;
+				margin: 20vh auto;
+				position: relative;
+				left: -2%;
 			}
 
 			.bubble-container .bubble {
@@ -249,7 +252,8 @@
 				max-width: 600px;
 				border-radius: 50%;
 				background: rgba(48,48,48,1);
-				border: 1px solid transparent;
+				border: 1px solid rgba(var(--focus-color-rgb),0.8);
+				backdrop-filter: blur(2.5px);
 				padding: .5em;
 			}
 			
@@ -267,16 +271,16 @@
 
 			.bubble::before {
 				content: "";
-				-moz-transform: rotate(-50deg);
-				-o-transform: rotate(-50deg);
-				-webkit-transform: rotate(-50deg);
-				transform: rotate(-50deg);
+				-moz-transform: rotate(-39deg);
+				-o-transform: rotate(-39deg);
+				-webkit-transform: rotate(-39deg);
+				transform: rotate(-39deg);
 				border-style: solid;
 				border-width: 80px 20px 0 20px;
 				border-color: rgba(48,48,48,1) transparent transparent transparent;
 				height: 0px;
 				position: absolute;
-				bottom: 20px;
+				bottom: 5px;
 				left: 90%;
 				width: 0px;
 				z-index: -1;
@@ -292,14 +296,15 @@
 				font-family: inherit;
 				text-shadow: inherit;
 				line-height: inherit;
+				font-size: 16px;
 			}
 
 			.bubble-container .bubble .oval center *:not(input) {
 				color: rgb(230,230,230);
 			}
 			
-			.bubble-container .bubble .oval center input {
-				color: rgb(0,0,0);
+			.bubble-container .bubble .oval center input, .bubble-container .bubble .oval center input::placeholder {
+				color: rgb(0,0,0) !important;
 			}
 
 			.bubble .oval button {	
@@ -307,14 +312,16 @@
 				text-shadow: inherit;
 				line-height: 1.75em !important;
 				background-color: rgba(0,164,0,0.8);
-				color: rgba(230,230,230,0.8) !important;
+				color: rgba(255,255,255,0.8) !important;
 				padding: 0em 0.5em !important;
 				border-radius: 0.42em;
+				border: solid 1.5px transparent;
 				font-style: italic;
 			}
 			
 			.bubble .oval button:hover, .bubble .oval button:active {	
-				color: rgb(0,0,0) !important;
+				background-color: rgba(0,64,0,0.8);
+				border: solid 1.5px rgba(230,230,230,0.8);
 			}
 
 			.Messanger {
@@ -336,7 +343,7 @@
 				background-size: cover;
 				display: block;
 				right: 0px;
-				top: 19vh;
+				top: 23vh;
 				overflow: overlay;
 				position: fixed;
 				z-index: 900;
@@ -351,7 +358,7 @@
 				read('SSID');
 				read('WKey');
 				call_install();
-				call();
+				call_s();
 			}
 
 			function next() {
@@ -388,12 +395,11 @@
 						default:
 							alert('Not Found');
 
-					}
-					
+					}					
 				} else {
 					switch (field_id ) {
 						case 'Domain':
-							vDomain = document.getElementById(field_id).value ;
+							vDomain = test(document.getElementById(field_id).value) ;
 							break;
 						case 'IP':
 							vIP = document.getElementById(field_id).value ;
@@ -414,7 +420,12 @@
 				};
 			}
 
-			function call() {
+			function test(value_type) {
+				alert(typeof value_type);
+				return value_type;
+			}
+
+			function call_s() {
 				alert ('Script started');
 				exec('sh wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh', function (error, stdout, stderr) {
 					if (error) {
@@ -472,51 +483,47 @@
 			}
 		</script>
 	</head>
-	<body class="lang_en modal-overlay-active" data-page>
-		<div id="modal_overlay">
-			
-			<div class="modal">
-				<div class="bubble-container">
-					<div class="bubble">
-						<blockquote class="oval">
-							<center id="Output">
-								<div class="Messanger" id="Hello">
-									<p>Hello, my name is @CyberAndi.<br> I will assist you through the router configuration process.
-									<button onclick="next()">Next</button>
-									</p>
-								</div>
-							        <div class="Messanger">
-									<p>Type the LAN-IP (Internal Network): <input type="text" id="IP" placeholder="192.168.1.1"></input>.
-									<!-- <button onclick="read('IP')">Submit</button> -->
-									</p>
-								</div>
-								<div class="Messanger">
-									<p>Your local Domain of your LAN? <input type="text" id="Domain" placeholder=".local"></input>.
-									<!-- <button onclick="read('Domain')">Submit</button> -->
-									</p>
-								</div>
-								<div class="Messanger">
-									<p>The Main-WiFi-SSID? <input type="text" id="SSID" placeholder="CyberSec-Box"></input>.
-									<!-- <button onclick="read('SSID')">Submit</button> -->
-									</p>
-								</div>
-								<div class="Messanger">
-									<p>And the WiFi-Key? <input type="text" id="WKey" placeholder="Cyber,Sec9ox"></input>.
-									<!-- <button onclick="read('WKey')">Submit</button> -->
-									</p>
-								</div>
-								<div class="Messanger">
-									<p>At least the user for the login:? <input type="text" id="User" placeholder="root"></input>.
-									<button onclick="read_all()">Submit</button>
-									</p>
-								</div>
-							</center> 
-						</blockquote>
-					</div>
-				</div>				
+	<body class="lang_en modal-overlay">
+		<div class="bubble-container">
+			<div class="bubble">
+				<blockquote class="oval">
+					<center id="Output">
+						<div class="Messanger" id="Hello">
+							<p>Hello, my name is @CyberAndi.<br> I will assist you through the router configuration process.
+							<button onclick="next()">Next</button>
+							</p>
+						</div>
+				       		<div class="Messanger">
+							<p>Type the LAN-IP (Internal Network): <input type="text" id="IP" placeholder="192.168.1.1"></input>.
+							</p>
+						</div>
+						<div class="Messanger">
+							<p>Your local Domain of your LAN? <input type="text" id="Domain" placeholder=".local"></input>.
+							</p>
+						</div>
+						<div class="Messanger">
+							<p>The Main-WiFi-SSID? <input type="text" id="SSID" placeholder="CyberSec-Box"></input>.
+							</p>
+						</div>
+						<div class="Messanger">
+							<p>And the WiFi-Key? <input type="text" id="WKey" placeholder="Cyber,Sec9ox"></input>.
+							</p>
+						</div>
+						<div class="Messanger">
+							<p>At least the user for the login:? <input type="text" id="User" placeholder="root"></input>.
+							<button onclick="read_all()">Submit</button>
+							</p>
+						</div>
+					</center> 
+				</blockquote>
 			</div>
-			<div id="avatar">
+		</div>				
+		<div id="avatar">
+		</div>
+		<div id="modal_overlay">
+			<div class="modal">
 			</div>
 		</div>
+
 	</body>
 </html>
