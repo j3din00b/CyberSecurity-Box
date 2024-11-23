@@ -160,12 +160,18 @@
 				-ms-interpolation-mode: bicubic
 			}
 
-			button,input,select,option,textarea {
+			button, select, option, textarea {
 				font-size: 100%;
 				box-sizing: border-box;
 				vertical-align: baseline;
 				line-height: 2em;
-				margin: 0
+				margin: 0;
+			}
+
+			input {
+				box-sizing: border-box;
+				vertical-align: baseline;
+				margin: 0;
 			}
 
 			button, .btn {
@@ -243,10 +249,9 @@
 			.bubble-container .bubble {
 				--focus-color-rgb: 82,168,0;
 				font-family: "OCR A Std";
-				font-size: 1.5em !important;
+				font-size: 1.25em !important;
 				line-height: 1.2em !important;
 				position: relative;
-				/*width: 90%;*/
 				min-height: 32px;
 				min-width: 270px;
 				max-width: 600px;
@@ -266,7 +271,7 @@
 				border: 2px solid transparent;
 				font-style: italic;
 				border-radius: 50%;
-				min-height: 25vh;
+				min-height: 18.5vh;
 			}
 
 			.bubble::before {
@@ -288,23 +293,33 @@
 
 			.bubble-container .bubble .oval center {
 				color: rgb(230,230,230) !important;
-				margin: 2.5em;
+				margin: calc((18.5vh - 2.5em) / 2) 3em;
 				opacity: 1 !important;
 			}
 
 			.bubble-container .bubble .oval center * {
 				font-family: inherit;
 				text-shadow: inherit;
-				line-height: inherit;
-				font-size: 16px;
+				font-style: inherit;
+				font-size: 14px;
 			}
 
 			.bubble-container .bubble .oval center *:not(input) {
 				color: rgb(230,230,230);
+				line-height: inherit;
 			}
 			
-			.bubble-container .bubble .oval center input, .bubble-container .bubble .oval center input::placeholder {
-				color: rgb(0,0,0) !important;
+			.bubble .oval input, .bubble .oval input::placeholder {
+				color: inherit !important;
+				background-color: rgba(20,20,20,0.8) !important;
+				backdrop-filter: blur(2.5px) !important;
+				max-width: 12.5em !important;
+			}
+
+
+			.bubble .oval input:is(:hover,:active,:focus), .bubble .oval input::placeholder:is(:hover,:active,:focus) {
+				/*color: rgb(0,0,0) !important;
+				background-Color: #ffffff !important;*/
 			}
 
 			.bubble .oval button {	
@@ -358,7 +373,7 @@
 				read('SSID');
 				read('WKey');
 				call_install();
-				call_s();
+				call();
 			}
 
 			function next() {
@@ -395,11 +410,12 @@
 						default:
 							alert('Not Found');
 
-					}					
+					}
+					
 				} else {
 					switch (field_id ) {
 						case 'Domain':
-							vDomain = test(document.getElementById(field_id).value) ;
+							vDomain = document.getElementById(field_id).value ;
 							break;
 						case 'IP':
 							vIP = document.getElementById(field_id).value ;
@@ -420,12 +436,7 @@
 				};
 			}
 
-			function test(value_type) {
-				alert(typeof value_type);
-				return value_type;
-			}
-
-			function call_s() {
+			function call() {
 				alert ('Script started');
 				exec('sh wget https://github.com/CyberAndi/CyberSecurity-Box/raw/CyberAndi-Pi-Hole-5/openWRT23_install.sh', function (error, stdout, stderr) {
 					if (error) {
