@@ -2028,9 +2028,9 @@ h1.bibleText {
 
 @keyframes aniBibleTxt1 {
  	0% {
-		opacity: var(--transparent);
-		display: var(--bibleTextHidden);
-		visibility: var(--unshow);
+		opacity: var(--tansparent);
+		display: var(--bibleTextDisplay);
+		visibility: var(--show);
   	}
 	5% {
 		opacity: var(--noTransparent);
@@ -2040,7 +2040,7 @@ h1.bibleText {
 	45% {
 		opacity: var(--noTransparent);
 		display: var(--bibleTextDisplay);
-		visibility: var(--show);
+		visibility: var(--unshow);
 	}
 	50% {
 		opacity: var(--transparent);
@@ -2048,38 +2048,49 @@ h1.bibleText {
 		visibility: var(--unshow);
 
 	}
-	100% {
+	95% {
 		opacity: var(--transparent);
 		display: var(--bibleTextHidden);
 		visibility: var(--unshow);
 	}
+	100% {
+		opacity: var(--transparent);
+		display: var(--bibleTextDisplay);
+		visibility: var(--show);
+	}
+
 }
 
 @keyframes aniBibleTxt2 {
 	0% {
-		opacity: var(--noTransparent);
-		display: var(--bibleTextDisplay);
-		visibility: var(--show);
+		opacity: var(--transparent);
+		display: var(--bibleTextHidden);
+		visibility: var(--unshow);
 	}
 	5% {
 		opacity: var(--transparent);
 		display: var(--bibleTextHidden);
 		visibility: var(--unshow);
 	}
-	45% {
+	47% {
 		opacity: var(--transparent);
-		display: var(--bibleTextHidden);
+		display: var(--bibleTextDisplay);
 		visibility: var(--unshow);
 	}
-	50% {
+	52% {
+		opacity: var(--noTransparent);
+		display: var(--bibleTextDisplay);
+		visibility: var(--show);
+	}
+	95% {
 		opacity: var(--noTransparent);
 		display: var(--bibleTextDisplay);
 		visibility: var(--show);
 	}
 	100% {
-		opacity: var(--noTransparent);
-		display: var(--bibleTextDisplay);
-		visibility: var(--show);
+		opacity: var(--tansparent);
+		display: var(--bibleTextHidden);
+		visibility: var(--unshow);
 	}
 }
 
